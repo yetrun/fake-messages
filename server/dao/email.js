@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const db = require('./db')
 const knex = require('knex')({
   debug: true,
   client: 'sqlite3',
@@ -10,54 +9,7 @@ const knex = require('knex')({
 const { attachPaginate } = require('knex-paginate')
 attachPaginate()
 
-// HACK: 同时返回所有 tags
-const getAllStatement = (whereClause = '', havingClause = '') => db.prepare(`
-  SELECT emails.*
-  FROM emails
-  LEFT JOIN tags on tags.targetType = 'Email' AND tags.targetId = emails.id
-  ${whereClause}
-  GROUP BY emails.id
-  ${havingClause}
-  ORDER BY createdAt desc
-  LIMIT @limit OFFSET @offset
-`)
-const getTotalStatement = (whereClause = '', havingClause = '') => db.prepare(`
-  SELECT count(*) as total from (
-    SELECT emails.id
-    FROM emails
-    LEFT JOIN tags on tags.targetType = 'Email' AND tags.targetId = emails.id
-    ${whereClause}
-    GROUP BY emails.id
-    ${havingClause}
-  )
-`)
-const getOneStatement = db.prepare('SELECT * FROM emails WHERE id = ?')
-const insertStatement = db.prepare(`INSERT INTO emails(fromName, fromAddress, toName, toAddress, subject, type, content)
-  VALUES (@fromName, @fromAddress, @toName, @toAddress, @subject, @type, @content)`)
-
-const getFromAddressesStatement = db.prepare(`
-  SELECT fromAddress
-  from emails
-  WHERE fromAddress LIKE @filter
-  GROUP BY fromAddress
-  ORDER BY createdAt desc
-  LIMIT @limit
-`)
-const getToAddressesStatement = db.prepare(`
-  SELECT toAddress
-  from emails
-  WHERE toAddress LIKE @filter
-  GROUP BY toAddress
-  ORDER BY createdAt desc
-  LIMIT @limit
-`)
-
-const getAllTagsStatement = db.prepare(`SELECT distinct(name) from tags WHERE targetType = 'Email'`)
-const getTagsOfEmailStatement = db.prepare(`SELECT * FROM tags WHERE targetType = "Email" and targetId = ?`)
-const insertTagsStatement = db.prepare(`INSERT INTO tags(name, targetType, targetId)
-  VALUES (@name, 'Email', @targetId)`)
-
-
+// TODO: 同时返回所有 tags
 const getAll = async function ({
   fromAddress,
   toAddress,
@@ -79,98 +31,78 @@ const getAll = async function ({
     if (createdAtFrom) query = query.where('emails.createdAt', '>=', createdAtFrom)
     if (createdAtTo) query = query.where('emails.createdAt', '<=', createdAtTo)
     query = query.whereIn('tags.name', tags).where('tags.targetType', 'Email')
-    return query
+    const result = await query
       .groupBy('emails.id')
       .orderBy('createdAt', 'desc')
-      .paginate({ from: from - 1, to: from - 1 + size })
-      .then(({ data: emails, pagination }) => {
-        emails.forEach(email => email.tags = getTagsOfEmail(email.id))
-        return { emails, total: pagination.total, pagination }
-      })
+      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1 })
+    const { data: emails, pagination } = result
+    await Promise.all(
+      emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
+    )
+    return { emails, total: pagination.total, pagination }
   } else {
     let query = knex('emails').select('*') // 返回所有字段，在应用层过滤字段的值
     if (fromAddress) query = query.where('fromAddress', fromAddress)
     if (toAddress) query = query.where('toAddress', toAddress)
     if (createdAtFrom) query = query.where('createdAt', '>=', createdAtFrom)
     if (createdAtTo) query = query.where('createdAt', '<=', createdAtTo)
-    return query.orderBy('createdAt', 'desc')
-      .paginate({ from: from - 1, to: from - 1 + size })
-      .then(({ data: emails, pagination }) => {
-        emails.forEach(email => email.tags = getTagsOfEmail(email.id))
-        return { emails, total: pagination.total, pagination }
-      })
+    const result = await query.orderBy('createdAt', 'desc')
+      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1 })
+    const { data: emails, pagination } = result
+    await Promise.all(
+      emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
+    )
+    return { emails, total: pagination.total, pagination }
   }
 }
 
-const getOne = db.transaction(id => {
-  const email = getOneStatement.get(id)
-  email.tags = getTagsOfEmail(id)
+const getOne = async function (id) {
+  const emails = await knex('emails').where('id', id)
+  const email = emails[0]
+  email.tags = await getTagsOfEmail(id)
   return email
-})
-
-const create = db.transaction(({ tags = [], ...params }) => {
-  const { lastInsertRowid: emailId } = insertStatement.run(params)
-  insertTags(emailId, tags)
-  return getOne(emailId)
-})
-
-const getFromAddresses = ({ filter }) => {
-  return getFromAddressesStatement.all({ filter: `%${filter}%`, limit: 10 }).map(row => row.fromAddress)
 }
 
-const getToAddresses = ({ filter }) => {
-  return getToAddressesStatement.all({ filter: `%${filter}%`, limit: 10 }).map(row => row.toAddress)
-}
-
-const getTags = () => {
-  return getAllTagsStatement.all().map(row => row.name)
-}
-
-function getTagsOfEmail (emailId) {
-  return getTagsOfEmailStatement.all(emailId).map(tag => tag.name)
-}
-
-function insertTags (emailId, tags) {
+const create = async function ({ tags = [], ...params }) {
+  const [emailId] = await knex('emails').insert(params)
   for (const tag of tags) {
-    insertTagsStatement.run({ name: tag, targetId: emailId })
+    await knex('tags').insert({ name: tag, targetType: 'Email', targetId: emailId })
   }
+  return getOne(emailId)
 }
 
-function buildWhereClause (filters) {
-  const whereConditions = []
-  if (filters.fromAddress) {
-    whereConditions.push('emails.fromAddress = @fromAddress')
-  }
-  if (filters.toAddress) {
-    whereConditions.push('emails.toAddress = @toAddress')
-  }
-  if (filters.createdAtFrom) {
-    whereConditions.push('createdAt >= @createdAtFrom')
-  }
-  if (filters.createdAtTo) {
-    whereConditions.push('createdAt <= @createdAtTo')
-  }
-  if (filters.tags) {
-    const tagParams = new Array(filters.tags.length).fill(0).map((_, index) => `@tag${index + 1}`)
-    whereConditions.push(`tags.name in (${tagParams.join(', ')})`)
-  }
-  return whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''
+const getFromAddresses = async function ({ filter }) {
+  const emails = await knex('emails').select('fromAddress')
+    .where('fromAddress', 'like', `%${filter}%`)
+    .groupBy('fromAddress')
+    .orderBy('createdAt', 'desc')
+    .limit(10)
+  return emails.map(email => email.fromAddress)
 }
 
-function buildHavingClause (filters) {
-  if (filters.tags) {
-    return `HAVING count(tags.id) = ${filters.tags.length}`
-  }
-  return ''
+const getToAddresses = async function ({ filter }) {
+  const emails = await knex('emails').select('toAddress')
+    .where('toAddress', 'like', `%${filter}%`)
+    .groupBy('toAddress')
+    .orderBy('createdAt', 'desc')
+    .limit(10)
+  return emails.map(email => email.toAddress)
 }
 
-function buildFilterParams (filters) {
-  const filterParams = Object.assign({}, filters)
-  if (filters.tags) {
-    const tagParams = filters.tags.map((tag, index) => [`tag${index + 1}`, tag])
-    Object.assign(filterParams, _.fromPairs(tagParams))
-  }
-  return filterParams
+const getTags = async function () {
+  const tags = await knex('tags').distinct('name')
+    .where('targetType', 'Email')
+    .limit(10)
+  return tags.map(tag => tag.name)
+}
+
+async function getTagsOfEmail (emailId) {
+  const tags = await knex('tags').distinct('name')
+    .where({
+      targetType: 'Email',
+      targetId: emailId
+    })
+  return tags.map(tag => tag.name)
 }
 
 module.exports = {
@@ -181,4 +113,3 @@ module.exports = {
   getFromAddresses,
   getTags
 }
-

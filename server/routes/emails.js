@@ -15,27 +15,28 @@ router.get('/', async function(req, res, next) {
   res.send({ emails, total })
 })
 
-router.get('/fromAddresses', function (req, res, next) {
+router.get('/fromAddresses', async function (req, res, next) {
   const { filter } = req.query
-  const fromAddresses = EmailDao.getFromAddresses({ filter })
+  const fromAddresses = await EmailDao.getFromAddresses({ filter })
   res.send({ fromAddresses })
 })
 
-router.get('/toAddresses', function (req, res, next) {
+router.get('/toAddresses', async function (req, res, next) {
   const { filter } = req.query
-  const toAddresses = EmailDao.getToAddresses({ filter })
+  const toAddresses = await EmailDao.getToAddresses({ filter })
   res.send({ toAddresses })
 })
 
-router.get('/tags', function (req, res, next) {
-  const tags = EmailDao.getTags()
+router.get('/tags', async function (req, res, next) {
+  // TODO: 似乎没有捕获异步错误
+  const tags = await EmailDao.getTags()
   res.send({ tags })
 })
 
 // TODO: 限制id为纯数字
-router.get('/:id', function(req, res, next) {
+router.get('/:id', async function(req, res, next) {
   const { id } = req.params
-  const email = EmailDao.getOne(id)
+  const email = await EmailDao.getOne(id)
   res.send({ email })
 })
 
@@ -45,14 +46,14 @@ router.post('/', [
   body('email.subject').not().isEmpty(),
   body('email.content').not().isEmpty(),
   body('email.tags').isArray()
-], function(req, res, next) {
+], async function(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
   }
 
   const emailParams = req.body.email
-  const email = EmailDao.create(emailParams)
+  const email = await EmailDao.create(emailParams)
   res.status(201).send({ email })
   websocket.broadcast({
     event: 'NewEmail',
