@@ -6,11 +6,11 @@ const websocket = require('../websocket')
 
 const router = express.Router()
 
-router.get('/', function(req, res, next) {
+router.get('/', async function(req, res, next) {
   const from = parseInt(req.query.from || 1)
   const size = parseInt(req.query.size || 10)
   const filters = _.pick(req.query, ['fromAddress', 'toAddress', 'tags', 'createdAtFrom', 'createdAtTo'])
-  const { emails, total } = EmailDao.getAll({ from, size, ...filters })
+  const { emails, total } = await EmailDao.getAll({ from, size, ...filters })
   simplifyContent(emails)
   res.send({ emails, total })
 })

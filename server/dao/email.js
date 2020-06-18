@@ -1,5 +1,14 @@
 const _ = require('lodash')
 const db = require('./db')
+const knex = require('knex')({
+  debug: true,
+  client: 'sqlite3',
+  connection: {
+    filename: "db/default.sqlite3"
+  }
+})
+const { attachPaginate } = require('knex-paginate')
+attachPaginate()
 
 // HACK: 同时返回所有 tags
 const getAllStatement = (whereClause = '', havingClause = '') => db.prepare(`
@@ -48,16 +57,50 @@ const getTagsOfEmailStatement = db.prepare(`SELECT * FROM tags WHERE targetType 
 const insertTagsStatement = db.prepare(`INSERT INTO tags(name, targetType, targetId)
   VALUES (@name, 'Email', @targetId)`)
 
-const getAll = db.transaction(({ from = 1, size = 10, ...filters }) => {
-  const whereClause = buildWhereClause(filters)
-  const havingClause = buildHavingClause(filters)
-  const filterParams = buildFilterParams(filters)
-  const emails = getAllStatement(whereClause, havingClause).all({ ...filterParams, limit: size, offset: from - 1 })
-  const { total } = getTotalStatement(whereClause, havingClause).get(filterParams) || { total: 0 }
-  
-  emails.forEach(email => email.tags = getTagsOfEmail(email.id))
-  return { emails, total }
-})
+
+const getAll = async function ({
+  fromAddress,
+  toAddress,
+  createdAtFrom,
+  createdAtTo,
+  tags,
+  from = 1,
+  size = 10
+} = {
+  from: 1,
+  size: 10
+}) {
+  if (tags) {
+    let query = knex().select('emails.*').from('emails').leftJoin('tags', function () {
+      this.on('tags.targetId', '=', 'emails.id')
+    }) // 返回所有字段，在应用层过滤字段的值
+    if (fromAddress) query = query.where('emails.fromAddress', fromAddress)
+    if (toAddress) query = query.where('emails.toAddress', toAddress)
+    if (createdAtFrom) query = query.where('emails.createdAt', '>=', createdAtFrom)
+    if (createdAtTo) query = query.where('emails.createdAt', '<=', createdAtTo)
+    query = query.whereIn('tags.name', tags).where('tags.targetType', 'Email')
+    return query
+      .groupBy('emails.id')
+      .orderBy('createdAt', 'desc')
+      .paginate({ from: from - 1, to: from - 1 + size })
+      .then(({ data: emails, pagination }) => {
+        emails.forEach(email => email.tags = getTagsOfEmail(email.id))
+        return { emails, total: pagination.total, pagination }
+      })
+  } else {
+    let query = knex('emails').select('*') // 返回所有字段，在应用层过滤字段的值
+    if (fromAddress) query = query.where('fromAddress', fromAddress)
+    if (toAddress) query = query.where('toAddress', toAddress)
+    if (createdAtFrom) query = query.where('createdAt', '>=', createdAtFrom)
+    if (createdAtTo) query = query.where('createdAt', '<=', createdAtTo)
+    return query.orderBy('createdAt', 'desc')
+      .paginate({ from: from - 1, to: from - 1 + size })
+      .then(({ data: emails, pagination }) => {
+        emails.forEach(email => email.tags = getTagsOfEmail(email.id))
+        return { emails, total: pagination.total, pagination }
+      })
+  }
+}
 
 const getOne = db.transaction(id => {
   const email = getOneStatement.get(id)
