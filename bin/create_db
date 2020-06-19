@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-const db = require('../server/dao/db')
+const sqlite3 = require('sqlite3')
+const db = new sqlite3.Database('db/default.sqlite3')
 
-db.exec(`CREATE TABLE emails (
+db.run(`CREATE TABLE emails (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
   fromName VARCHAR(255),
   fromAddress VARCHAR(255) NOT NULL,
@@ -14,14 +15,14 @@ db.exec(`CREATE TABLE emails (
   createdAt DATETIME DEFAULT (datetime('now','localtime'))
 )`)
 
-db.exec(`CREATE TABLE messages (
+db.run(`CREATE TABLE messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
   toMobile VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
   createdAt DATETIME DEFAULT (datetime('now','localtime'))
 )`)
 
-db.exec(`CREATE TABLE tags (
+db.run(`CREATE TABLE tags (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
   name VARCHAR(255) NOT NULL,
   targetType VARCHAR(255) NOT NULL,
@@ -29,4 +30,3 @@ db.exec(`CREATE TABLE tags (
 )`)
 
 db.close()
-

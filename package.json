@@ -3,9 +3,9 @@
   "version": "1.1.0",
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "NODE_ENV=production webpack --mode production",
     "start": "node ./bin/www",
-    "dev": "node bin/dev_server",
+    "dev": "NODE_ENV=development node bin/dev_server",
     "dev:server": "cross-env DEBUG=fake-messages:* nodemon node ./bin/www",
     "dev:client": "webpack -w"
   },

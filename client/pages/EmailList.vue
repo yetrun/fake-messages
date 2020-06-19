@@ -104,8 +104,8 @@ export default {
       },
       pageInfo: {
         number: 1,
-        size: 10,
-        total: 0
+        size: 100, // TODO: 成为一个可控的变量
+        total: 0 // TODO: 翻页有问题，第二页是个空白页
       },
       options: {
         tags: [],

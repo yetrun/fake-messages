@@ -2,7 +2,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const path = require('path')
 
 module.exports = {
-  mode: 'development',
+  mode: process.env.NODE_ENV || 'development',
   target: 'web',
   entry: [
     '@babel/polyfill',

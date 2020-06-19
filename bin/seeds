@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+
+const { addMonths, format } = require('date-fns')
+const knex = require('../server/dao/knex')
+const g = require('../lib/generators')
+const EmailDAO = require('../server/dao/email')
+
+// 创建若干条邮件
+;(async function () {
+  const generateEmailBase = g.objectGenerator({
+    tags: g.rotatedGenerator( [
+      ['TAG1'],
+      ['TAG2'],
+      ['TAG1', 'TAG2'],
+      []
+    ]),
+    subject: g.sequenceGenerator(i => `邮件 ${i}`),
+    createdAt: g.incrementedGenerator(
+      new Date(2019, 0),
+      date => addMonths(date, 1),
+      date => format(date, 'YYYY-MM-DD hh:mm:ss')
+    )
+  }, [
+    // generate type and content
+    g.rotatedGenerator([
+      { type: 'text', content: '这是 TEXT 正文。\n它不带任何标签。' },
+      { type: 'text', content: '这是 TEXT 正文。\n它带有<span>被标签包裹的内容</span>标签。\n你可以看到这些标签显示在正文中。' },
+      { type: 'html', content: '<p>这是 HTML 正文。</p><p>源代码中带有 p 标签，但是在渲染时你将看不到这些标签。<p>' }
+    ]),
+    // generate from and to
+    g.rotatedGenerator(
+      g.permutateTwo([
+        { name: '小红', address: 'xiaohong@example.com' },
+        { name: '小明', address: 'xiaoming@example.com' },
+        { name: '小刚', address: 'xiaogang@example.com' }
+      ]).map(([from, to]) => {
+        return {
+          fromName: from.name, fromAddress: from.address,
+          toName: to.name, toAddress: to.address
+        }
+      })
+    )
+  ])
+
+  // TODO: 创建的时候走了好多条的 SQL
+  for (let i = 1; i <= 15; i++) {
+    const emailBase = generateEmailBase()
+    console.log('Create email', emailBase)
+    await EmailDAO.create({
+      ...emailBase
+    })
+  }
+
+  knex.destroy()
+})()
