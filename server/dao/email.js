@@ -1,13 +1,5 @@
 const _ = require('lodash')
-const knex = require('knex')({
-  debug: true,
-  client: 'sqlite3',
-  connection: {
-    filename: "db/default.sqlite3"
-  }
-})
-const { attachPaginate } = require('knex-paginate')
-attachPaginate()
+const knex = require('./knex')
 
 // TODO: 同时返回所有 tags
 const getAll = async function ({
@@ -22,6 +14,7 @@ const getAll = async function ({
   from: 1,
   size: 10
 }) {
+  // TODO: 优化此处的写法
   if (tags) {
     let query = knex().select('emails.*').from('emails').leftJoin('tags', function () {
       this.on('tags.targetId', '=', 'emails.id')

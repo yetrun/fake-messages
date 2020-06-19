@@ -1,116 +1,87 @@
 const _ = require('lodash')
-const db = require('./db')
+const knex = require('./knex')
 
-const getAllStatement = (whereClause = '', havingClause = '') => db.prepare(`
-  SELECT messages.*
-  FROM messages
-  LEFT JOIN tags on tags.targetType = 'Message' AND tags.targetId = messages.id
-  ${whereClause}
-  GROUP BY messages.id
-  ${havingClause}
-  ORDER BY createdAt desc
-  LIMIT @limit OFFSET @offset
-`)
-const getTotalStatement = (whereClause = '', havingClause = '') => db.prepare(`
-  SELECT count(*) as total from (
-    SELECT messages.id
-    FROM messages
-    LEFT JOIN tags on tags.targetType = 'Message' AND tags.targetId = messages.id
-    ${whereClause}
-    GROUP BY messages.id
-    ${havingClause}
-  )
-`)
-const getOneStatement = db.prepare('SELECT * FROM messages WHERE id = ?')
-const insertStatement = db.prepare('INSERT INTO messages(toMobile, content) VALUES (@toMobile, @content)')
+const getAll = async function ({
+  from = 1,
+  size = 10,
+  toMobile,
+  createdAtFrom,
+  createdAtTo,
+  tags
+} = {
+  from: 1,
+  size: 10
+}) {
+  if (tags) {
+    let query = knex().select('messages.*').from('messages').leftJoin('tags', function () {
+      this.on('tags.targetId', '=', 'messages.id')
+    })
+    if (toMobile) query = query.where('messages.toMobile', toMobile)
+    if (createdAtFrom) query = query.where('messages.createdAt', '>=', createdAtFrom)
+    if (createdAtTo) query = query.where('messages.createdAt', '<=', createdAtTo)
+    query = query.whereIn('tags.name', tags).where('tags.targetType', 'Message')
+    const result = await query
+      .groupBy('messages.id')
+      .orderBy('createdAt', 'desc')
+      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
+    const { data: messages, pagination } = result
+    await Promise.all(
+      messages.map(message => { return getTagsOfMessage(message.id).then(tags => message.tags = tags) })
+    )
+    return { messages, total: pagination.total, pagination }
+  } else {
+    let query = knex('messages').select('*') // 返回所有字段，在应用层过滤字段的值
+    if (toMobile) query = query.where('toMobile', toMobile)
+    if (createdAtFrom) query = query.where('createdAt', '>=', createdAtFrom)
+    if (createdAtTo) query = query.where('createdAt', '<=', createdAtTo)
+    const result = await query.orderBy('createdAt', 'desc')
+      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
+    const { data: messages, pagination } = result
+    await Promise.all(
+      messages.map(message => { return getTagsOfMessage(message.id).then(tags => message.tags = tags) })
+    )
+    return { messages, total: pagination.total, pagination }
+  }
+}
 
-const getToMobilesStatement = db.prepare(`
-  SELECT toMobile
-  from messages
-  WHERE toMobile LIKE @filter
-  GROUP BY toMobile
-  ORDER BY createdAt desc
-  LIMIT @limit
-`)
-
-const getAllTagsStatement = db.prepare(`SELECT distinct(name) from tags WHERE targetType = 'Message'`)
-const getTagsOfMessageStatement = db.prepare(`SELECT * FROM tags WHERE targetType = "Message" and targetId = ?`)
-const insertTagStatement = db.prepare(`INSERT INTO tags(name, targetType, targetId)
-  VALUES (@name, 'Message', @targetId)`)
-
-const getAll = db.transaction(({ from = 1, size = 10, ...filters }) => {
-  const whereClause = buildWhereClause(filters)
-  const havingClause = buildHavingClause(filters)
-  const filterParams = buildFilterParams(filters)
-  const messages = getAllStatement(whereClause, havingClause).all({ ...filterParams, limit: size, offset: from - 1 })
-  const { total } = getTotalStatement(whereClause, havingClause).get(filterParams) || { total: 0 }
-
-  messages.forEach(message => message.tags = getTagsOfMessage(message.id))
-  return { messages, total }
-})
-
-const getOne = id => {
-  const message = getOneStatement.get(id)
-  message.tags = getTagsOfMessage(id)
+const getOne = async function (id) {
+  const messages = await knex('messages').where('id', id)
+  const message = messages[0]
+  message.tags = await getTagsOfMessage(id)
   return message
 }
 
-const create = ({ tags = [], ...params }) => {
-  const { lastInsertRowid: messageId } = insertStatement.run(params)
-  insertTags(messageId, tags)
+const create = async function ({ tags = [], ...params }) {
+  const [messageId] = await knex('messages').insert(params)
+  for (const tag of tags) {
+    await knex('tags').insert({ name: tag, targetType: 'Message', targetId: messageId })
+  }
   return getOne(messageId)
 }
 
-const getToMobiles = ({ filter }) => {
-  return getToMobilesStatement.all({ filter: `%${filter}%`, limit: 10 }).map(row => row.toMobile)
+const getToMobiles = async function ({ filter }) {
+  const messages = await knex('messages').select('toMobile')
+    .where('toMobile', 'like', `%${filter}%`)
+    .groupBy('toMobile')
+    .orderBy('createdAt', 'desc')
+    .limit(10)
+  return messages.map(message => message.toMobile)
 }
 
-const getTags = () => {
-  return getAllTagsStatement.all().map(row => row.name)
+const getTags = async function () {
+  const tags = await knex('tags').distinct('name')
+    .where('targetType', 'Message')
+    .limit(10)
+  return tags.map(tag => tag.name)
 }
 
-function getTagsOfMessage (messageId) {
-  return getTagsOfMessageStatement.all(messageId).map(tag => tag.name)
-}
-
-function insertTags (messageId, tags) {
-  for (const tag of tags) {
-    insertTagStatement.run({ name: tag, targetId: messageId })
-  }
-}
-
-function buildWhereClause (filters) {
-  const whereConditions = []
-  if (filters.toMobile) {
-    whereConditions.push('messages.toMobile = @toMobile')
-  }
-  if (filters.createdAtFrom) {
-    whereConditions.push('createdAt >= @createdAtFrom')
-  }
-  if (filters.createdAtTo) {
-    whereConditions.push('createdAt <= @createdAtTo')
-  }
-  if (filters.tags) {
-    const tagParams = new Array(filters.tags.length).fill(0).map((_, index) => `@tag${index + 1}`)
-    whereConditions.push(`tags.name in (${tagParams.join(', ')})`)
-  }
-  return whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''
-}
-
-function buildHavingClause (filters) {
-  if (filters.tags) {
-    return `HAVING count(tags.id) = ${filters.tags.length}`
-  }
-  return ''
-}
-
-function buildFilterParams (filters) {
-  const filterParams = Object.assign({}, filters)
-  if (filters.tags) {
-    const tagParams = filters.tags.map((tag, index) => [`tag${index + 1}`, tag])
-    Object.assign(filterParams, _.fromPairs(tagParams))
-  }
-  return filterParams
+async function getTagsOfMessage (messageId) {
+  const tags = await knex('tags').distinct('name')
+    .where({
+      targetType: 'Message',
+      targetId: messageId
+    })
+  return tags.map(tag => tag.name)
 }
 
 module.exports = {
@@ -119,4 +90,3 @@ module.exports = {
   getToMobiles,
   getTags
 }
-

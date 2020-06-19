@@ -2,6 +2,7 @@
 const { addSeconds, subSeconds, format } = require('date-fns')
 const db = require('../server/dao/db')
 
+// TODO: 创建的数据内加入一些标签
 const insertEmailStatement = db.prepare(`
   INSERT INTO emails(fromName, fromAddress, toName, toAddress, subject, type, content, createdAt)
   VALUES (@fromName, @fromAddress, @toName, @toAddress, @subject, @type, @content, @createdAt)
