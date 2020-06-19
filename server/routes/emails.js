@@ -28,7 +28,6 @@ router.get('/toAddresses', async function (req, res, next) {
 })
 
 router.get('/tags', async function (req, res, next) {
-  // TODO: 似乎没有捕获异步错误
   const tags = await EmailDao.getTags()
   res.send({ tags })
 })
