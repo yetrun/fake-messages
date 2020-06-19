@@ -32,7 +32,6 @@ router.get('/tags', async function (req, res, next) {
   res.send({ tags })
 })
 
-// TODO: 限制id为纯数字
 router.get('/:id', async function(req, res, next) {
   const { id } = req.params
   const email = await EmailDao.getOne(id)

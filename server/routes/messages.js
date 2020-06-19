@@ -38,7 +38,6 @@ router.post('/', [
 
   const messageParams = req.body.message
   const message = await MessageDao.create(messageParams)
-  // TODO: WebSocket 似乎失效了
   res.status(201).send({ message })
   websocket.broadcast({
     event: 'NewMessage',
