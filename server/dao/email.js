@@ -14,39 +14,30 @@ const getAll = async function ({
   from: 1,
   size: 10
 }) {
-  // TODO: 优化此处的写法
+  let query // 返回所有字段，在应用层过滤字段的值
   if (tags) {
-    let query = knex().select('emails.*').from('emails').leftJoin('tags', function () {
-      this.on('tags.targetId', '=', 'emails.id')
-    }) // 返回所有字段，在应用层过滤字段的值
-    if (fromAddress) query = query.where('emails.fromAddress', fromAddress)
-    if (toAddress) query = query.where('emails.toAddress', toAddress)
-    if (createdAtFrom) query = query.where('emails.createdAt', '>=', createdAtFrom)
-    if (createdAtTo) query = query.where('emails.createdAt', '<=', createdAtTo)
-    query = query.whereIn('tags.name', tags).where('tags.targetType', 'Email')
-    const result = await query
+    query = knex('emails').select('emails.*')
+      .leftJoin('tags', function () {
+        this.on('tags.targetId', '=', 'emails.id')
+      }) 
+      .whereIn('tags.name', tags)
+      .where('tags.targetType', 'Email')
       .groupBy('emails.id')
-      .orderBy('createdAt', 'desc')
-      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
-    const { data: emails, pagination } = result
-    await Promise.all(
-      emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
-    )
-    return { emails, total: pagination.total, pagination }
   } else {
-    let query = knex('emails').select('*') // 返回所有字段，在应用层过滤字段的值
-    if (fromAddress) query = query.where('fromAddress', fromAddress)
-    if (toAddress) query = query.where('toAddress', toAddress)
-    if (createdAtFrom) query = query.where('createdAt', '>=', createdAtFrom)
-    if (createdAtTo) query = query.where('createdAt', '<=', createdAtTo)
-    const result = await query.orderBy('createdAt', 'desc')
-      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
-    const { data: emails, pagination } = result
-    await Promise.all(
-      emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
-    )
-    return { emails, total: pagination.total, pagination }
+    query = knex('emails').select('*')
   }
+
+  if (fromAddress) query = query.where('emails.fromAddress', fromAddress)
+  if (toAddress) query = query.where('emails.toAddress', toAddress)
+  if (createdAtFrom) query = query.where('emails.createdAt', '>=', createdAtFrom)
+  if (createdAtTo) query = query.where('emails.createdAt', '<=', createdAtTo)
+
+  const { data: emails, pagination } = await query.orderBy('createdAt', 'desc')
+    .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
+  await Promise.all(
+    emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
+  )
+  return { emails, total: pagination.total, pagination }
 }
 
 const getOne = async function (id) {

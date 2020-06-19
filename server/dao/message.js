@@ -12,36 +12,28 @@ const getAll = async function ({
   from: 1,
   size: 10
 }) {
+  let query // 返回所有字段，在应用层过滤字段的值
   if (tags) {
-    let query = knex().select('messages.*').from('messages').leftJoin('tags', function () {
-      this.on('tags.targetId', '=', 'messages.id')
-    })
-    if (toMobile) query = query.where('messages.toMobile', toMobile)
-    if (createdAtFrom) query = query.where('messages.createdAt', '>=', createdAtFrom)
-    if (createdAtTo) query = query.where('messages.createdAt', '<=', createdAtTo)
-    query = query.whereIn('tags.name', tags).where('tags.targetType', 'Message')
-    const result = await query
+    query = knex('messages').select('messages.*')
+      .leftJoin('tags', function () {
+        this.on('tags.targetId', '=', 'messages.id')
+      })
+      .whereIn('tags.name', tags).where('tags.targetType', 'Message')
       .groupBy('messages.id')
-      .orderBy('createdAt', 'desc')
-      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
-    const { data: messages, pagination } = result
-    await Promise.all(
-      messages.map(message => { return getTagsOfMessage(message.id).then(tags => message.tags = tags) })
-    )
-    return { messages, total: pagination.total, pagination }
   } else {
-    let query = knex('messages').select('*') // 返回所有字段，在应用层过滤字段的值
-    if (toMobile) query = query.where('toMobile', toMobile)
-    if (createdAtFrom) query = query.where('createdAt', '>=', createdAtFrom)
-    if (createdAtTo) query = query.where('createdAt', '<=', createdAtTo)
-    const result = await query.orderBy('createdAt', 'desc')
-      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
-    const { data: messages, pagination } = result
-    await Promise.all(
-      messages.map(message => { return getTagsOfMessage(message.id).then(tags => message.tags = tags) })
-    )
-    return { messages, total: pagination.total, pagination }
+    query = knex('messages').select('*')
   }
+
+  if (toMobile) query = query.where('messages.toMobile', toMobile)
+  if (createdAtFrom) query = query.where('messages.createdAt', '>=', createdAtFrom)
+  if (createdAtTo) query = query.where('messages.createdAt', '<=', createdAtTo)
+
+  const { data: messages, pagination }= await query.orderBy('createdAt', 'desc')
+    .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
+  await Promise.all(
+    messages.map(message => { return getTagsOfMessage(message.id).then(tags => message.tags = tags) })
+  )
+  return { messages, total: pagination.total, pagination }
 }
 
 const getOne = async function (id) {
