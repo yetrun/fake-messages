@@ -1,10 +1,9 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-/* GET home page. */
-// TODO: API 添加前缀
+/* GET home page writen as vue spa. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+  res.render('index')
+})
 
-module.exports = router;
+module.exports = router
