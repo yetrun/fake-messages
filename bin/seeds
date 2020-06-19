@@ -4,9 +4,10 @@ const { addMonths, format } = require('date-fns')
 const knex = require('../server/dao/knex')
 const g = require('../lib/generators')
 const EmailDAO = require('../server/dao/email')
+const MessageDAO = require('../server/dao/message')
 
 // 创建若干条邮件
-;(async function () {
+async function createEmails () {
   const generateEmailBase = g.objectGenerator({
     tags: g.rotatedGenerator( [
       ['TAG1'],
@@ -50,6 +51,36 @@ const EmailDAO = require('../server/dao/email')
       ...emailBase
     })
   }
+}
 
+// 创建若干条短信
+async function createMessages () {
+  const generateMessageBase = g.objectGenerator({
+    tags: g.rotatedGenerator([
+      ['TAG1'],
+      ['TAG2'],
+      ['TAG1', 'TAG2'],
+      []
+    ]),
+    toMobile: g.rotatedGenerator([
+      '#001', '#002', '#003'
+    ]),
+    content: g.sequenceGenerator(i => `短信内容 ${i}`),
+    createdAt: g.incrementedGenerator(
+      new Date(2019, 0),
+      date => addMonths(date, 1),
+      date => format(date, 'YYYY-MM-DD hh:mm:ss')
+    )
+  })
+  for (let i = 0; i < 15; i++) {
+    const message = generateMessageBase()
+    console.log('Create message', message)
+    await MessageDAO.create(message)
+  }
+}
+
+;(async function () {
+  await createEmails()
+  await createMessages()
   knex.destroy()
 })()
