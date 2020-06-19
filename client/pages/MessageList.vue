@@ -35,7 +35,7 @@
       </template>
     </Table>
     <br>
-    <Page :total="pageInfo.total" :current="pageInfo.number" @on-change="pageNumberChanged" />
+    <Page :total="pageInfo.total" :page-size="pageInfo.size" :current="pageInfo.number" @on-change="pageNumberChanged" />
   </div>
 </template>
 
