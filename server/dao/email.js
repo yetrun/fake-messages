@@ -34,7 +34,7 @@ const getAll = async function ({
     const result = await query
       .groupBy('emails.id')
       .orderBy('createdAt', 'desc')
-      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1 })
+      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
     const { data: emails, pagination } = result
     await Promise.all(
       emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
@@ -47,7 +47,7 @@ const getAll = async function ({
     if (createdAtFrom) query = query.where('createdAt', '>=', createdAtFrom)
     if (createdAtTo) query = query.where('createdAt', '<=', createdAtTo)
     const result = await query.orderBy('createdAt', 'desc')
-      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1 })
+      .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
     const { data: emails, pagination } = result
     await Promise.all(
       emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
