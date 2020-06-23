@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const sqlite3 = require('sqlite3')
+// TODO: 使用 knex 改写
 const db = new sqlite3.Database('db/default.sqlite3')
 
 db.run(`CREATE TABLE emails (
@@ -27,6 +28,14 @@ db.run(`CREATE TABLE tags (
   name VARCHAR(255) NOT NULL,
   targetType VARCHAR(255) NOT NULL,
   targetId INTEGER NOT NULL
+)`)
+
+// TODO: 模板的 id
+db.run(`CREATE TABLE templates (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+  name VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  createdAt DATETIME DEFAULT (datetime('now','localtime'))
 )`)
 
 db.close()
