@@ -1,32 +1,22 @@
 <template>
   <div>
     <p class="add-line">
-      <Button type="primary" @click="showAddModal">添加</Button>
+      <Button type="primary" @click="showModal()">添加</Button>
     </p>
     <br>
     <Table :columns="columns" :data="templates">
       <template slot="operators" slot-scope="{ row, index }">
-        <Button type="info" @click="showUpdateModal(row)">更新</Button>
+        <Button type="info" @click="showModal(row)">更新</Button>
         <Button type="error" @click="deleteTemplate(row)">删除</Button>
       </template>
     </Table>
-    <Modal v-model="isAddModalShown" title="新增模板" @on-ok="createTemplate">
+    <Modal v-model="modal.shown" :title="modal.title" @on-ok="saveTemplate">
       <Form>
         <FormItem>
-          <Input type="text" v-model="template.name" placeholder="填写模板名称"></Input>
+          <Input type="text" v-model="modal.template.name" placeholder="填写模板名称"></Input>
         </FormItem>
         <FormItem>
-          <Input type="textarea" v-model="template.content" placeholder="填写模板内容"></Input>
-        </FormItem>
-      </Form>
-    </Modal>
-    <Modal v-model="isUpdateModalShown" title="更新模板" @on-ok="updateTemplate">
-      <Form>
-        <FormItem>
-          <Input type="text" v-model="template.name" placeholder="填写模板名称"></Input>
-        </FormItem>
-        <FormItem>
-          <Input type="textarea" v-model="template.content" placeholder="填写模板内容"></Input>
+          <Input type="textarea" v-model="modal.template.content" placeholder="填写模板内容"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -63,9 +53,11 @@ export default {
         }
       ],
       templates: [],
-      template: {},
-      isAddModalShown: false,
-      isUpdateModalShown: false
+      modal: {
+        title: '',
+        template: {},
+        shown: false
+      }
     }
   },
   methods: {
@@ -79,8 +71,8 @@ export default {
           console.error('error', arguments);
         })
     },
-    createTemplate () {
-      axios.post('/templates', { template: this.template })
+    createTemplate (template) {
+      axios.post('/templates', { template })
         .then(response => {
           const { template } = response.data
           this.templates.push(template)
@@ -89,8 +81,8 @@ export default {
           console.error('error', arguments)
         })
     },
-    updateTemplate () {
-      axios.put(`/templates/${this.template.id}`, { template: this.template })
+    updateTemplate (template) {
+      axios.put(`/templates/${template.id}`, { template })
         .then(response => {
           const { template } = response.data
           const i = this.templates.findIndex(temp => temp.id === template.id)
@@ -110,13 +102,22 @@ export default {
           console.error('error', arguments)
         })
     },
-    showAddModal () {
-      this.template = {}
-      this.isAddModalShown = true
+    saveTemplate () {
+      if ('id' in this.modal.template) {
+        this.updateTemplate(this.modal.template)
+      } else {
+        this.createTemplate(this.modal.template)
+      }
     },
-    showUpdateModal (template) {
-      this.template = Object.assign({}, template)
-      this.isUpdateModalShown = true
+    showModal (template) {
+      this.modal.shown = true
+      if (template) {
+        this.modal.template = template
+        this.modal.title = '更新模板'
+      } else {
+        this.modal.template = {}
+        this.modal.title = '新增模板'
+      }
     }
   },
   mounted () {

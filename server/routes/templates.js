@@ -19,7 +19,7 @@ router.post('/', [
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const templateParams = req.body.template
+  const templateParams = _.pick(req.body.template, ['name', 'content'])
   const template = await TemplateDAO.create(templateParams)
   res.send({ template })
 })
