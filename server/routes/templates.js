@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const express = require('express')
 const { body, validationResult } = require('express-validator')
 const TemplateDAO = require('../dao/template')
@@ -20,6 +21,21 @@ router.post('/', [
 
   const templateParams = req.body.template
   const template = await TemplateDAO.create(templateParams)
+  res.send({ template })
+})
+
+router.put('/:id', [
+  body('template.name').not().isEmpty(),
+  body('template.content').not().isEmpty()
+], async function(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const templateParams = _.pick(req.body.template, ['name', 'content'])
+  templateParams.id = req.params.id
+  const template = await TemplateDAO.update(templateParams)
   res.send({ template })
 })
 

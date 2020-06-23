@@ -5,14 +5,19 @@ const findAll = async function () {
   return { templates }
 }
 
+const find = async function (id) {
+  const templates = await knex('templates').where({ id: id })
+  return templates[0]
+}
+
 const create = async function (params) {
   const [templateId] = await knex('templates').insert(params)
   return await find(templateId)
 }
 
-const find = async function (id) {
-  const templates = await knex('templates').where({ id: id })
-  return templates[0]
+const update = async function ( { id, ...params }) {
+  await knex('templates').where({ id }).update(params)
+  return await find(id)
 }
 
 const destroy = async function (id) {
@@ -23,5 +28,6 @@ module.exports = {
   findAll,
   find,
   create,
+  update,
   destroy
 }
