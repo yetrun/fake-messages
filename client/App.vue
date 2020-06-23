@@ -13,6 +13,10 @@
               <Icon type="ios-chatbubbles"></Icon>
               短信
             </MenuItem>
+            <MenuItem name="templates" :to="{ name: 'templates' }" class="main-menu">
+              <Icon type="ios-albums"></Icon>
+              模板
+            </MenuItem>
             <MenuItem name="docs" :to="{ name: 'docs' }" class="secondary-menu">
               开发者文档
             </MenuItem>
@@ -53,6 +57,8 @@ export default {
       this.activeMenu = 'emails'
     } else if (hash === '#/messages' || hash.startsWith('#/messages/')){
       this.activeMenu = 'messages'
+    } else if (hash === '#/templates' || hash.startsWith('#/templates/')){
+      this.activeMenu = 'templates'
     }
 
     websocket.connect()

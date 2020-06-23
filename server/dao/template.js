@@ -10,7 +10,7 @@ const create = async function (params) {
   return await find(templateId)
 }
 
-const find = async function ({ id }) {
+const find = async function (id) {
   const templates = await knex('templates').where({ id: id })
   return templates[0]
 }
