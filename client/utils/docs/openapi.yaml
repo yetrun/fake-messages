@@ -200,4 +200,77 @@ paths:
                     - "标签2"
                   content: "短信正文"
                   createdAt: "2019-07-22 18:06:06"
-
+  /messages/xsend:
+    post:
+      summary: "使用模板发送短信"
+      requestBody:
+        description: "发送的短信实体"
+        content:
+          application/json:
+            schema:
+              properties:
+                message:
+                  type: "object"
+                  properties:
+                    toMobile:
+                      type: "string"
+                      description: "接受者的手机号"
+                      required: true
+                    tags:
+                      type: "array"
+                      description: "自定义的标签数组，标签对于标记短信特别有用。"
+                      items:
+                        type: "string"
+                    templateId:
+                      type: "number"
+                      description: "模板 id"
+                      required: true
+                    bindings:
+                      type: "object"
+                      description: "变量绑定的键值对"
+            example:
+              message:
+                toMobile: "#001"
+                tags:
+                  - "标签1"
+                  - "标签2"
+                templateId: 1
+                bindings:
+                  CODE: '121212'
+      responses:
+        201:
+          content:
+            application/json:
+              description: "返回发送成功的短信"
+              schema:
+                properties:
+                  message:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "integer"
+                        description: "新短信的 id"
+                      toMobile:
+                        type: "string"
+                        description: "接受者的手机号"
+                      tags:
+                        type: "array"
+                        description: "自定义的标签数组，标签对于标记短信特别有用。"
+                        items:
+                          type: "string"
+                      content:
+                        type: "string"
+                        description: "短信正文的内容"
+                      createdAt:
+                        type: "string"
+                        format: "date-time"
+                        description: "发送短信的时间，格式始终是`YYYY-MM-DD hh:mm:ss`，时区以服务器所在时区为准。"
+              example:
+                message:
+                  id: 1
+                  toMobile: "#001"
+                  tags:
+                    - "标签1"
+                    - "标签2"
+                  content: "短信正文"
+                  createdAt: "2019-07-22 18:06:06"

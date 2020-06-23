@@ -31,6 +31,10 @@ export default {
     return {
       columns: [
         {
+          title: 'ID',
+          key: 'id'
+        },
+        {
           title: '名称',
           key: 'name'
         },
