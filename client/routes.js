@@ -1,6 +1,7 @@
 import EmailList from '@/pages/EmailList.vue'
 import EmailDetails from '@/pages/EmailDetails.vue'
 import MessageList from '@/pages/MessageList.vue'
+import TemplateList from '@/pages/TemplateList.vue'
 import Docs from '@/pages/Docs.vue'
 
 export default [
@@ -8,6 +9,7 @@ export default [
   { name: 'emails', path: '/emails', component: EmailList },
   { name: 'email', path: '/emails/:id', component: EmailDetails },
   { name: 'messages', path: '/messages', component: MessageList },
+  { name: 'templates', path: '/templates', component: TemplateList },
   { name: 'docs', path: '/docs', component: Docs }
 ]
 
