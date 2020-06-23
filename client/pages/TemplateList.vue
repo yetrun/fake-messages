@@ -5,8 +5,8 @@
     </p>
     <br>
     <Table :columns="columns" :data="templates">
-      <template slot="operators">
-        <div>操作</div>
+      <template slot="operators" slot-scope="{ row, index }">
+        <Button type="error" @click="deleteTemplate(row)">删除</Button>
       </template>
     </Table>
     <Modal v-model="showAddModal" title="新增模板" @on-ok="createTemplate">
@@ -43,7 +43,7 @@ export default {
           key: 'content'
         },
         {
-          title: '时间',
+          title: '创建于',
           key: 'createdAt'
         },
         {
@@ -72,6 +72,16 @@ export default {
         .then(response => {
           const { template } = response.data
           this.templates.push(template)
+        })
+        .catch(() => {
+          console.error('error', arguments)
+        })
+    },
+    deleteTemplate (template) {
+      axios.delete(`/templates/${template.id}`)
+        .then(response => {
+          const i = this.templates.findIndex(temp => temp.id === template.id)
+          this.templates.splice(i, 1)
         })
         .catch(() => {
           console.error('error', arguments)

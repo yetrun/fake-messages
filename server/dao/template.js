@@ -15,8 +15,13 @@ const find = async function (id) {
   return templates[0]
 }
 
+const destroy = async function (id) {
+  await knex('templates').where({ id: id }).del()
+}
+
 module.exports = {
   findAll,
   find,
-  create
+  create,
+  destroy
 }

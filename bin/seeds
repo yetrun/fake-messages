@@ -82,9 +82,9 @@ async function createMessages () {
 
 async function createTemplates () {
   console.log('Create templates.')
-  await TemplateDAO.create({ name: '发送验证码', content: '您的验证码是%{CODE}' })
-  await TemplateDAO.create({ name: '发送验证码2', content: '您的验证码是%{CODE}' })
-  await TemplateDAO.create({ name: '发送验证码3', content: '您的验证码是%{CODE}' })
+  await TemplateDAO.create({ name: '发送验证码', content: '您的验证码是 %{CODE}.' })
+  await TemplateDAO.create({ name: '发送验证码2', content: '您的验证码是 %{CODE}.' })
+  await TemplateDAO.create({ name: '发送验证码3', content: '您的验证码是 %{CODE}.' })
 }
 
 ;(async function () {

@@ -23,4 +23,10 @@ router.post('/', [
   res.send({ template })
 })
 
+router.delete('/:id', async function (req, res, next) {
+  const templateId = req.params.id
+  await TemplateDAO.destroy(templateId)
+  res.end()
+})
+
 module.exports = router
