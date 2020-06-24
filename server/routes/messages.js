@@ -38,7 +38,7 @@ router.post('/', [
   }
 
   const messageParams = req.body.message
-  await sendMessage(messageParams)
+  await sendMessage(messageParams, res)
 })
 
 router.post('/xsend', [
