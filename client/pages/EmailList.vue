@@ -59,11 +59,7 @@
 import axios from 'axios'
 import websocket from '@/websocket'
 import { toNamedContact } from '@/utils/emails'
-
-// TODO: 客户端和服务端同时使用的函数
-function stripHTMLTags (content) {
-  return content.replace(/<[^>]*>?/gm, '')
-}
+import { stripHTMLTags } from '@lib/htmltools.js'
 
 export default {
   name: 'EmailList',

@@ -3,6 +3,7 @@ const express = require('express')
 const { body, validationResult } = require('express-validator')
 const EmailDao = require('../dao/email')
 const websocket = require('../websocket')
+const { stripHTMLTags } = require('../../lib/htmltools')
 
 const router = express.Router()
 
@@ -69,9 +70,4 @@ function simplifyContent (emails) {
   })
 }
 
-function stripHTMLTags (content) {
-  return content.replace(/<[^>]*>?/gm, '')
-}
-
 module.exports = router
-

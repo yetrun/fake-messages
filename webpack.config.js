@@ -59,7 +59,8 @@ module.exports = {
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'client')
+      '@': path.resolve(__dirname, 'client'),
+      '@lib': path.resolve(__dirname, 'lib')
     },
     extensions: ['*', '.js', '.vue', '.json']
   },
