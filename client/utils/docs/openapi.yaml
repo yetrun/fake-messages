@@ -10,7 +10,7 @@ info:
     name: "run"
     email: "run27017@126.com"
 servers:
-  - url: "http://localhost:3000"
+  - url: "http://localhost:3000/api"
 
 paths:
   /emails:

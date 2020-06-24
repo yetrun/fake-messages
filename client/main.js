@@ -6,6 +6,9 @@ import './filters'
 import ViewUI from 'view-design'
 import 'view-design/dist/styles/iview.css'
 import './global.css'
+import axios from 'axios'
+
+axios.defaults.baseURL = '/api'
 
 Vue.use(VueRouter)
 Vue.use(ViewUI)
@@ -19,4 +22,3 @@ new Vue({
   router,
   render: h => h(App)
 })
-
