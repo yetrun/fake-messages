@@ -33,11 +33,11 @@ db.run(`CREATE TABLE tags (
 // TODO: 模板的 id
 db.run(`CREATE TABLE templates (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  category VARCHAR(255) DEFAULT 'email',
+  category VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
   subject VARCHAR(1023),
   content TEXT NOT NULL,
-  content_type VARCHAR(255) DEFAULT 'text',
+  contentType VARCHAR(255) DEFAULT 'text',
   createdAt DATETIME DEFAULT (datetime('now','localtime'))
 )`)
 

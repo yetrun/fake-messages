@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator')
 const TemplateDAO = require('../dao/template')
 
 const router = express.Router()
+const allowed_params = ['name', 'category', 'subject' ,'content', 'content_type', 'tags']
 
 router.get('/', async function(req, res, next) {
   const { templates } = await TemplateDAO.findAll()
@@ -19,7 +20,8 @@ router.post('/', [
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const templateParams = _.pick(req.body.template, ['name', 'content'])
+  // TODO: 使用 validation 提取参数
+  const templateParams = _.pick(req.body.template, ['name', 'category', 'subject' ,'content', 'content_type', 'tags'])
   const template = await TemplateDAO.create(templateParams)
   res.send({ template })
 })
@@ -33,7 +35,7 @@ router.put('/:id', [
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const templateParams = _.pick(req.body.template, ['name', 'content'])
+  const templateParams = _.pick(req.body.template, ['name', 'category', 'subject' ,'content', 'content_type', 'tags'])
   templateParams.id = req.params.id
   const template = await TemplateDAO.update(templateParams)
   res.send({ template })

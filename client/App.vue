@@ -10,7 +10,7 @@
               邮件
             </MenuItem>
             <MenuItem name="messages" :to="{ name: 'messages' }" class="main-menu">
-              <Icon type="ios-chatbubbles"></Icon>
+              <Icon type="ios-chatboxes"></Icon>
               短信
             </MenuItem>
             <MenuItem name="templates" :to="{ name: 'templates' }" class="main-menu">

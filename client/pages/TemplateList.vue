@@ -5,18 +5,58 @@
     </p>
     <br>
     <Table :columns="columns" :data="templates">
+      <template slot="category" slot-scope="{ row }">
+        {{ row.category === 'Email' ? '邮件' : '短信' }}
+      </template>
+      <template slot-scope="{ row }" slot="tags">
+        <Tag v-for="tag in row.tags" :key="tag" @click.native="addTagFilter(tag)">
+          {{ tag }}
+        </Tag>
+      </template>
       <template slot="operators" slot-scope="{ row, index }">
         <Button type="info" @click="showModal(row)">更新</Button>
         <Button type="error" @click="deleteTemplate(row)">删除</Button>
       </template>
     </Table>
-    <Modal v-model="modal.shown" :title="modal.title" @on-ok="saveTemplate">
+    <Modal v-model="modal.shown" :title="modal.title" :width="960" @on-ok="saveTemplate">
       <Form>
         <FormItem>
           <Input type="text" v-model="modal.template.name" placeholder="填写模板名称"></Input>
         </FormItem>
         <FormItem>
-          <Input type="textarea" v-model="modal.template.content" placeholder="填写模板内容"></Input>
+          <RadioGroup v-model="modal.template.category">
+            <Radio label="Email">
+              <Icon type="ios-mail"></Icon>
+              <span>邮件</span>
+            </Radio>
+            <Radio label="Message">
+              <Icon type="ios-chatboxes"></Icon>
+              <span>短信</span>
+            </Radio>
+          </RadioGroup>
+        </FormItem>
+        <FormItem>
+          <!--TODO: iview 的 select 组件之坑 -->
+          <Select v-model="modal.template.tags" multiple clearable allow-create filterable placeholder="选择标签">
+            <Option v-for="tag in modal.template.tags" :value="tag" :key="tag">{{ tag }}</Option>
+            <Option value="调皮">调皮</Option>
+          </Select>
+        </FormItem>
+        <FormItem v-if="modal.template.category === 'Email'">
+          <Input type="text" v-model="modal.template.subject" placeholder="填写主题"></Input>
+        </FormItem>
+        <FormItem>
+          <RadioGroup v-model="modal.template.contentType">
+            <Radio label="text">
+              <span>text</span>
+            </Radio>
+            <Radio label="html">
+              <span>html</span>
+            </Radio>
+          </RadioGroup>
+        </FormItem>
+        <FormItem>
+          <Input type="textarea" v-model="modal.template.content" :rows="12" placeholder="填写模板内容"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -33,18 +73,31 @@ export default {
       columns: [
         {
           title: 'ID',
-          key: 'id',
-          maxWidth: 80
+          key: 'id'
+        },
+        {
+          title: '类别',
+          slot: 'category'
+        },
+        {
+          title: '标签',
+          slot: 'tags'
         },
         {
           title: '名称',
-          key: 'name',
-          minWidth: 120
+          key: 'name'
+        },
+        {
+          title: '主题',
+          key: 'subject'
+        },
+        {
+          title: '格式',
+          key: 'contentType'
         },
         {
           title: '内容',
-          key: 'content',
-          minWidth: 400 
+          key: 'content'
         },
         {
           title: '创建于',
@@ -58,7 +111,9 @@ export default {
       templates: [],
       modal: {
         title: '',
-        template: {},
+        template: {
+          tags: []
+        },
         shown: false
       }
     }
@@ -115,10 +170,15 @@ export default {
     showModal (template) {
       this.modal.shown = true
       if (template) {
+        // TODO: 更新模板时数据也更新了
         this.modal.template = template
         this.modal.title = '更新模板'
       } else {
-        this.modal.template = {}
+        this.modal.template = {
+          category: 'Email',
+          contentType: 'text',
+          tags: []
+        }
         this.modal.title = '新增模板'
       }
     }
