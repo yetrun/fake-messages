@@ -13,7 +13,7 @@ servers:
   - url: "http://localhost:3000/api"
 
 paths:
-  /emails:
+  /emails/send:
     post:
       summary: "发送邮件"
       requestBody:
@@ -246,7 +246,7 @@ paths:
                   type: "text"
                   content: "邮件正文"
                   createdAt: "2019-07-22 18:06:06"
-  /messages:
+  /messages/send:
     post:
       summary: "发送短信"
       requestBody:
@@ -317,7 +317,7 @@ paths:
                   createdAt: "2019-07-22 18:06:06"
   /messages/xsend:
     post:
-      summary: "使用模板发送短信"
+      summary: "通过模板发送短信"
       requestBody:
         description: "发送的短信实体"
         content:

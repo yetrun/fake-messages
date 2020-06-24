@@ -27,7 +27,7 @@ router.get('/tags', async function (req, res, next) {
   res.send({ tags })
 })
 
-router.post('/', [
+router.post('/send', [
   body('message.toMobile').not().isEmpty(),
   body('message.content').not().isEmpty(),
   body('message.tags').isArray()
