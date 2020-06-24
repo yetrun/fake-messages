@@ -33,15 +33,18 @@ export default {
       columns: [
         {
           title: 'ID',
-          key: 'id'
+          key: 'id',
+          maxWidth: 80
         },
         {
           title: '名称',
-          key: 'name'
+          key: 'name',
+          minWidth: 120
         },
         {
           title: '内容',
-          key: 'content'
+          key: 'content',
+          minWidth: 400 
         },
         {
           title: '创建于',
