@@ -170,8 +170,7 @@ export default {
     showModal (template) {
       this.modal.shown = true
       if (template) {
-        // TODO: 更新模板时数据也更新了
-        this.modal.template = template
+        this.modal.template = Object.assign({}, template)
         this.modal.title = '更新模板'
       } else {
         this.modal.template = {
