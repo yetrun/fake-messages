@@ -131,6 +131,121 @@ paths:
                   type: "text"
                   content: "邮件正文"
                   createdAt: "2019-07-22 18:06:06"
+  /emails/xsend:
+    post:
+      summary: "通过模板发送邮件"
+      requestBody:
+        description: "发送的邮件实体"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                email:
+                  type: "object"
+                  properties:
+                    toAddress:
+                      type: "string"
+                      description: "接受者的邮箱地址"
+                      required: true
+                    toName:
+                      type: "string"
+                      description: "接收者的姓名"
+                    fromAddress:
+                      type: "string"
+                      description: "发送者的邮箱地址"
+                      required: true
+                    fromName:
+                      type: "string"
+                      description: "发送者的姓名"
+                    tags:
+                      type: "array"
+                      description: "自定义的标签数组，标签对于标记邮件特别有用。"
+                      items:
+                        type: "string"
+                    subject:
+                      type: "string"
+                      description: "邮件主题"
+                      required: true
+                    templateId:
+                      type: "number"
+                      description: "模板 id"
+                      required: true
+                    bindings:
+                      type: "object"
+                      description: "变量绑定的键值对"
+            example:
+              email:
+                toAddress: "receiver@example.com"
+                toName: "接收者"
+                fromAddress: "sender@example.com"
+                fromName: "发送者"
+                tags:
+                  - "标签1"
+                  - "标签2"
+                templateId: 1
+                bindings:
+                  NAME: '李先生'
+      responses:
+        201:
+          description: "返回发送成功的邮件"
+          content:
+            application/json:
+              schema:
+                properties:
+                  email:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "integer"
+                        description: "新邮件的 id"
+                      toAddress:
+                        type: "string"
+                        description: "接受者的邮箱地址"
+                      toName:
+                        type: "string"
+                        description: "接收者的姓名"
+                      fromAddress:
+                        type: "string"
+                        description: "发送者的邮箱地址"
+                      fromName:
+                        type: "string"
+                        description: "发送者的姓名"
+                      tags:
+                        type: "array"
+                        description: "自定义的标签数组，标签对于标记邮件特别有用。"
+                        items:
+                          type: "string"
+                      subject:
+                        type: "string"
+                        description: "邮件主题"
+                      type:
+                        type: "string"
+                        description: "邮件正文的格式，可选值是`text`或`html`"
+                        enum:
+                          - "text"
+                          - "html"
+                      content:
+                        type: "string"
+                        description: "邮件正文的内容"
+                      createdAt:
+                        type: "string"
+                        format: "date-time"
+                        description: "发送邮件的时间，格式始终是`YYYY-MM-DD hh:mm:ss`，时区以服务器所在时区为准。"
+              example:
+                email:
+                  id: 1
+                  toAddress: "receiver@example.com"
+                  toName: "接收者"
+                  fromAddress: "sender@example.com"
+                  fromName: "发送者"
+                  tags:
+                    - "标签1"
+                    - "标签2"
+                  subject: "邮件主题"
+                  type: "text"
+                  content: "邮件正文"
+                  createdAt: "2019-07-22 18:06:06"
   /messages:
     post:
       summary: "发送短信"
@@ -234,7 +349,7 @@ paths:
                 tags:
                   - "标签1"
                   - "标签2"
-                templateId: 1
+                templateId: 2
                 bindings:
                   CODE: '121212'
       responses:

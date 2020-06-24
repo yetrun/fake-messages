@@ -82,9 +82,9 @@ async function createMessages () {
 
 async function createTemplates () {
   console.log('Create templates.')
-  await TemplateDAO.create({ name: '一个邮件模版', category: 'Email', subject: '仅一封邮件而已', content: '祝您愉快', tags: ['tag1', 'tag2'] })
-  await TemplateDAO.create({ name: '发送验证码模板', category: 'Message', content: '您的验证码是 %{CODE}.', tags: ['tag3'] })
-  await TemplateDAO.create({ name: '发送验证码3', category: 'Message', content: '您的验证码是 %{CODE}.' })
+  await TemplateDAO.create({ name: '欢迎注册的邮件模板', category: 'Email', subject: '欢迎入驻我们平台', content: '尊敬的%{NAME}：欢迎入驻我们平台！', tags: ['tag1', 'tag2'] })
+  await TemplateDAO.create({ name: '发送验证码的模板', category: 'Message', content: '您的验证码是 %{CODE}.', tags: ['tag3'] })
+  await TemplateDAO.create({ name: '测试模板', category: 'Message', content: '您的验证码是 %{CODE}.' })
 }
 
 ;(async function () {
