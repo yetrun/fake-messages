@@ -2,10 +2,10 @@ const _ = require('lodash')
 const express = require('express')
 const { body, validationResult } = require('express-validator')
 const EmailDao = require('../dao/email')
-const TemplateDAO = require('../dao/template')
 const TagsDAO = require('../dao/tags')
 const websocket = require('../websocket')
 const { stripHTMLTags } = require('../../lib/htmltools')
+const { parseContent } = require('../helpers/template')
 
 const router = express.Router()
 
@@ -96,15 +96,6 @@ function simplifyContent (emails) {
       email.content = stripHTMLTags(email.content).substr(0, 80)
     }
   })
-}
-
-// TODO: email 和 message 都用了此方法
-async function parseContent (templateId, bindings) {
-  const template = await TemplateDAO.find(templateId)
-  const content = template.content.replace(/%{([^{}]+)}/g, function (_, variable) {
-    return bindings[variable]
-  })
-  return { subject: template.subject, content, contentType: template.contentType }
 }
 
 module.exports = router

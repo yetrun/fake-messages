@@ -5,6 +5,7 @@ const MessageDAO = require('../dao/message')
 const TemplateDAO = require('../dao/template')
 const TagsDAO = require('../dao/tags')
 const websocket = require('../websocket')
+const { parseContent } = require('../helpers/template')
 
 const router = express.Router()
 
@@ -56,7 +57,7 @@ router.post('/xsend', [
   const messageRealParams = {
     toMobile: messageParams.toMobile,
     tags: messageParams.tags,
-    content: await parseContent(messageParams.templateId, messageParams.bindings)
+    content: (await parseContent(messageParams.templateId, messageParams.bindings)).content
   }
   await sendMessage(messageRealParams, res)
 })
@@ -67,13 +68,6 @@ async function sendMessage (params, res) {
   websocket.broadcast({
     event: 'NewMessage',
     data: message
-  })
-}
-
-async function parseContent (templateId, bindings) {
-  const template = await TemplateDAO.find(templateId)
-  return template.content.replace(/%{([^{}]+)}/g, function (_, variable) {
-    return bindings[variable]
   })
 }
 
