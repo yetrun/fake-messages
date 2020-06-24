@@ -4,6 +4,7 @@ const path = require('path')
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
   target: 'web',
+  devtool: 'source-map',
   entry: [
     '@babel/polyfill',
     './client/main.js'

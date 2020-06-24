@@ -6,7 +6,7 @@
 !/db/.keep
 
 # webpack打包的文件
-/public/javascripts/app.js
+/public/javascripts/*
 /public/assets
 
 # Vim sessions
