@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const knex = require('./knex')
+const TagsDAO = require('./tags')
 
 const getAll = async function ({
   from = 1,
@@ -31,7 +32,9 @@ const getAll = async function ({
   const { data: messages, pagination }= await query.orderBy('createdAt', 'desc')
     .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
   await Promise.all(
-    messages.map(message => { return getTagsOfMessage(message.id).then(tags => message.tags = tags) })
+    messages.map(message => { 
+      return TagsDAO.findOf('Message', message.id).then(tags => message.tags = tags)
+    })
   )
   return { messages, total: pagination.total, pagination }
 }
@@ -39,7 +42,7 @@ const getAll = async function ({
 const getOne = async function (id) {
   const messages = await knex('messages').where('id', id)
   const message = messages[0]
-  message.tags = await getTagsOfMessage(id)
+  message.tags = await TagsDAO.findOf('Message', id)
   return message
 }
 
@@ -60,25 +63,8 @@ const getToMobiles = async function ({ filter }) {
   return messages.map(message => message.toMobile)
 }
 
-const getTags = async function () {
-  const tags = await knex('tags').distinct('name')
-    .where('targetType', 'Message')
-    .limit(10)
-  return tags.map(tag => tag.name)
-}
-
-async function getTagsOfMessage (messageId) {
-  const tags = await knex('tags').distinct('name')
-    .where({
-      targetType: 'Message',
-      targetId: messageId
-    })
-  return tags.map(tag => tag.name)
-}
-
 module.exports = {
   getAll,
   create,
-  getToMobiles,
-  getTags
+  getToMobiles
 }

@@ -3,6 +3,7 @@ const express = require('express')
 const { body, validationResult } = require('express-validator')
 const EmailDao = require('../dao/email')
 const TemplateDAO = require('../dao/template')
+const TagsDAO = require('../dao/tags')
 const websocket = require('../websocket')
 const { stripHTMLTags } = require('../../lib/htmltools')
 
@@ -30,7 +31,7 @@ router.get('/toAddresses', async function (req, res, next) {
 })
 
 router.get('/tags', async function (req, res, next) {
-  const tags = await EmailDao.getTags()
+  const tags = await TagsDAO.findOf('Email', { limit: 10 })
   res.send({ tags })
 })
 

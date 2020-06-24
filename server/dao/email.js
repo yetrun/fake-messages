@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const knex = require('./knex')
+const TagsDAO = require('./tags')
 
 // TODO: 同时返回所有 tags
 const getAll = async function ({
@@ -35,7 +36,9 @@ const getAll = async function ({
   const { data: emails, pagination } = await query.orderBy('createdAt', 'desc')
     .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
   await Promise.all(
-    emails.map(email => { return getTagsOfEmail(email.id).then(tags => email.tags = tags) })
+    emails.map(email => {
+      return TagsDAO.findOf('Email', email.id).then(tags => email.tags = tags)
+    })
   )
   return { emails, total: pagination.total, pagination }
 }
@@ -43,7 +46,7 @@ const getAll = async function ({
 const getOne = async function (id) {
   const emails = await knex('emails').where('id', id)
   const email = emails[0]
-  email.tags = await getTagsOfEmail(id)
+  email.tags = await TagsDAO.findOf('Email', email.id)
   return email
 }
 
@@ -73,27 +76,10 @@ const getToAddresses = async function ({ filter }) {
   return emails.map(email => email.toAddress)
 }
 
-const getTags = async function () {
-  const tags = await knex('tags').distinct('name')
-    .where('targetType', 'Email')
-    .limit(10)
-  return tags.map(tag => tag.name)
-}
-
-async function getTagsOfEmail (emailId) {
-  const tags = await knex('tags').distinct('name')
-    .where({
-      targetType: 'Email',
-      targetId: emailId
-    })
-  return tags.map(tag => tag.name)
-}
-
 module.exports = {
   getAll,
   getOne,
   create,
   getToAddresses,
-  getFromAddresses,
-  getTags
+  getFromAddresses
 }

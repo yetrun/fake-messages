@@ -3,6 +3,7 @@ const express = require('express')
 const { body, validationResult } = require('express-validator')
 const MessageDAO = require('../dao/message')
 const TemplateDAO = require('../dao/template')
+const TagsDAO = require('../dao/tags')
 const websocket = require('../websocket')
 
 const router = express.Router()
@@ -23,7 +24,7 @@ router.get('/toMobiles', async function (req, res, next) {
 })
 
 router.get('/tags', async function (req, res, next) {
-  const tags = await MessageDAO.getTags()
+  const tags = await TagsDAO.findOf('Message', { limit: 10 })
   res.send({ tags })
 })
 
