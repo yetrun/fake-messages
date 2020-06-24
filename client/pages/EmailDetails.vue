@@ -35,13 +35,9 @@
 <script>
 import axios from 'axios'
 import { toNamedContact } from '@/utils/emails'
-import { Card } from 'iview'
 
 export default {
   name: 'EmailDetails',
-  components: {
-    Card
-  },
   data () {
     return {
       email: null

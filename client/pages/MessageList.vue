@@ -42,14 +42,9 @@
 <script>
 import axios from 'axios'
 import websocket from '@/websocket'
-import { Table, Page } from 'iview'
 
 export default {
   name: 'MessageList',
-  components: {
-    Table,
-    Page
-  },
   data() { 
     return {
       columns: [

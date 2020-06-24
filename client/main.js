@@ -3,12 +3,12 @@ import VueRouter from 'vue-router'
 import App from './App.vue'
 import routes from './routes'
 import './filters'
-import iView from 'iview'
-import 'iview/dist/styles/iview.css'
+import ViewUI from 'view-design'
+import 'view-design/dist/styles/iview.css'
 import './global.css'
 
 Vue.use(VueRouter)
-Vue.use(iView)
+Vue.use(ViewUI)
 
 const router = new VueRouter({
   routes

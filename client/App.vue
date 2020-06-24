@@ -33,19 +33,10 @@
 </template>
 
 <script>
-import { Layout, Header, Content, Menu, MenuItem, Icon } from 'iview'
 import websocket from './websocket'
 
 export default {
   name: 'App',
-  components: {
-    Layout,
-    Header,
-    Content,
-    Menu,
-    MenuItem,
-    Icon
-  },
   data () {
     return {
       activeMenu: ''
