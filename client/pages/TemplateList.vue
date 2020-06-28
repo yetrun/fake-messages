@@ -56,7 +56,7 @@
           </RadioGroup>
         </FormItem>
         <FormItem>
-          <Input type="textarea" v-model="modal.template.content" :rows="12" placeholder="填写模板内容"></Input>
+          <Input type="textarea" v-model="modal.template.content" :rows="12" placeholder="填写模板内容，其中变量名用形如 %{VAR} 的格式表示"></Input>
         </FormItem>
       </Form>
     </Modal>
