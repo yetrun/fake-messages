@@ -3,10 +3,12 @@
 /**
  * Module dependencies.
  */
-const websocket = require('../server/websocket');
-const app = require('../server/app');
-const debug = require('debug')('fake-messages:server');
-const http = require('http');
+const fs = require('fs')
+const debug = require('debug')('fake-messages:server')
+const http = require('http')
+const https = require('https')
+const websocket = require('../server/websocket')
+const app = require('../server/app')
 
 /**
  * Get port from environment and store in Express.
@@ -15,9 +17,19 @@ const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Create HTTP or HTTPs server.
  */
-const server = http.createServer(app);
+let server = null
+if (process.env.SSL_KEY_PATH) {
+  const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH)
+  const certificate = fs.readFileSync(process.env.SSL_CERT_PATH)
+  server = https.createServer({
+    key: privateKey,
+    cert: certificate
+  }, app)
+} else {
+  server = http.createServer(app)
+}
 
 /**
  * Listen on provided port, on all network interfaces.

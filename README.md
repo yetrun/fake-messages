@@ -76,6 +76,8 @@ yarn run build
 PORT=3000 yarn start
 ```
 
+可以配置 https，传递环境变量 `SSL_KEY_PATH`、`SSL_CERT_PATH`（只许用 pem 格式）。
+
 ### 使用
 
 执行部署命令后，数据库文件会生成到路径 db/default.sqlite3. 服务器成功启动后，访问`http://域名:3000`即可进入项目首页。

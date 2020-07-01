@@ -49,7 +49,7 @@ function addEventListener (event, listener) {
 
 function url () {
   const location = window.location
-  const protocol = location.protocol === 'https' ? 'wss' : 'ws'
+  const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
   return `${protocol}://${location.host}`
 }
 
