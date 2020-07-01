@@ -6,7 +6,7 @@
 const fs = require('fs')
 const debug = require('debug')('fake-messages:server')
 const http = require('http')
-const https = require('https')
+const httpx = require('../lib/httpx')
 const websocket = require('../server/websocket')
 const app = require('../server/app')
 
@@ -23,7 +23,7 @@ let server = null
 if (process.env.SSL_KEY_PATH) {
   const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH)
   const certificate = fs.readFileSync(process.env.SSL_CERT_PATH)
-  server = https.createServer({
+  server = httpx.createServer({
     key: privateKey,
     cert: certificate
   }, app)
@@ -39,9 +39,9 @@ server.on('error', onError);
 server.on('listening', onListening);
 
 /**
- * Load websocket module into http server.
+ * Load websocket module into https or http server.
  */
-websocket.createServer(server);
+websocket.createServer(server.https || server.http || server)
 
 /**
  * Normalize a port into a number, string, or false.

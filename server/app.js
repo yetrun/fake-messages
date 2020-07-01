@@ -5,6 +5,17 @@ const logger = require('morgan')
 
 const app = express()
 
+// 首先将所有 http 链接跳转到 https
+if (process.env.SSL_KEY_PATH) {
+  app.use (function (req, res, next) {
+    if (req.secure) {
+      next()
+    } else {
+      res.redirect('https://' + req.headers.host + req.url)
+    }
+  })
+}
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
