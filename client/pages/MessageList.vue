@@ -172,9 +172,11 @@ export default {
         message.isNew = true
         this.messages.unshift(message)
 
-        Notification.requestPermission(function(status) {
-          new Notification(`手机号 ${message.toMobile} 收到一条新消息`, { body: message.content })
-        })
+        if (this.$global.notificating) {
+          Notification.requestPermission(function(status) {
+            new Notification(`手机号 ${message.toMobile} 收到一条新消息`, { body: message.content })
+          })
+        }
       }
     })
   }

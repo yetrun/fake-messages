@@ -218,17 +218,19 @@ export default {
         email.isNew = true
         this.emails.unshift(email)
 
-        Notification.requestPermission(status => {
-          let body = email.content
-          if (email.type === 'html') body = stripHTMLTags(email.content)
-          body = body.substr(0, 20)
-          const notification = new Notification(`收到一条新邮件`, { body: body })
-          notification.onclick = () => {
-            const { href } = this.$router.resolve({ name: 'email', params: { id: email.id } })
-            window.open(location.origin + href)
-            notification.close()
-          }
-        })
+        if (this.$global.notificating) {
+          Notification.requestPermission(status => {
+            let body = email.content
+            if (email.type === 'html') body = stripHTMLTags(email.content)
+            body = body.substr(0, 20)
+            const notification = new Notification(`收到一条新邮件`, { body: body })
+            notification.onclick = () => {
+              const { href } = this.$router.resolve({ name: 'email', params: { id: email.id } })
+              window.open(location.origin + href)
+              notification.close()
+            }
+          })
+        }
       }
     })
   }

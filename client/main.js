@@ -10,6 +10,8 @@ import axios from 'axios'
 
 axios.defaults.baseURL = '/api'
 
+Vue.prototype.$global = {}
+
 Vue.use(VueRouter)
 Vue.use(ViewUI)
 
