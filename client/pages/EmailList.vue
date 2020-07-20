@@ -225,8 +225,9 @@ export default {
             body = body.substr(0, 20)
             const notification = new Notification(`收到一条新邮件`, { body: body })
             notification.onclick = () => {
-              const { href } = this.$router.resolve({ name: 'email', params: { id: email.id } })
-              window.open(location.origin + href)
+              this.$router.push({ name: 'email', params: { id: email.id } })
+              window.focus()
+              email.isNew = false
               notification.close()
             }
           })
