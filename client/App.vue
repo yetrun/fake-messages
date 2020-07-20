@@ -51,7 +51,7 @@ export default {
     }
   },
   watch: {
-    receivingNotification: {
+    notificating: {
       handler () {
         this.$global.notificating = this.notificating
       },
