@@ -46,7 +46,7 @@ router.post('/send', [
   body('email.fromAddress').not().isEmpty(),
   body('email.subject').not().isEmpty(),
   body('email.content').not().isEmpty(),
-  body('email.tags').isArray()
+  body('email.tags').optional().isArray()
 ], async function(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

@@ -32,7 +32,7 @@ router.get('/tags', async function (req, res, next) {
 router.post('/send', [
   body('message.toMobile').not().isEmpty(),
   body('message.content').not().isEmpty(),
-  body('message.tags').isArray()
+  body('message.tags').optional().isArray()
 ], async function(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

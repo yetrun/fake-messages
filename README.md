@@ -103,7 +103,7 @@ yarn run dev
 
 其他的有用的开发环境下的命令列举如下：
 
-- `bin/create_seeds`: 创建一些种子数据。
+- `bin/seeds`: 创建一些种子数据。
 
 ## 适配器模式
 
