@@ -57,3 +57,14 @@ knex.schema.createTable('templates', function (table) {
 }).then(() => {
   console.log('Table templates created!')
 })
+
+// TODO: 表名是否可以设置成大写
+knex.schema.createTable('privateNumberBindings', function (table) {
+  table.increments()
+  table.string('phoneNumberA').notNullable()
+  table.string('phoneNumberB').notNullable()
+  table.string('virtualNumber').notNullable()
+  table.timestamp('createdAt').defaultTo(knex.fn.now())
+}).then(() => {
+  console.log('Table privateNumbers created!')
+})

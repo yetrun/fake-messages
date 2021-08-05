@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const knex = require('./knex')
 const TagsDAO = require('./tags')
 

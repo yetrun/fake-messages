@@ -5,6 +5,7 @@ const knex = require('../server/dao/knex')
 const g = require('../lib/generators')
 const EmailDAO = require('../server/dao/email')
 const MessageDAO = require('../server/dao/message')
+const PrivateNumberBindingDAO = require('../server/dao/private_number_binding')
 const TemplateDAO = require('../server/dao/template')
 
 // 创建若干条邮件
@@ -80,6 +81,25 @@ async function createMessages () {
   }
 }
 
+async function createPrivateNumberBindings () {
+  const generatePrivateNumberBinding = g.objectGenerator({
+    // TODO: 常量 generator
+    phoneNumberA: g.sequenceGenerator(i => 'a' + i),
+    phoneNumberB: g.sequenceGenerator(i => 'b' + i),
+    virtualNumber: g.sequenceGenerator(i => 'v' + i),
+    createdAt: g.incrementedGenerator(
+      new Date(2019, 0),
+      date => addMonths(date, 1),
+      date => format(date, 'yyyy-MM-dd hh:mm:ss')
+    )
+  })
+  for (let i = 0; i < 15; i++) {
+    const privateNumberBinding = generatePrivateNumberBinding()
+    console.log('Create private number binding', privateNumberBinding)
+    await PrivateNumberBindingDAO.create(privateNumberBinding)
+  }
+}
+
 async function createTemplates () {
   console.log('Create templates.')
   await TemplateDAO.create({ name: '欢迎注册的邮件模板', category: 'Email', subject: '欢迎入驻我们平台', content: '尊敬的%{NAME}：欢迎入驻我们平台！', tags: ['tag1', 'tag2'] })
@@ -92,6 +112,7 @@ async function createTemplates () {
     await createEmails()
     await createMessages()
     await createTemplates()
+    await createPrivateNumberBindings()
   } finally {
     knex.destroy()
   }

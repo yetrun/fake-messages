@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default ({
   name: 'PrivateNumberIndex',
   data () {
@@ -48,6 +50,10 @@ export default ({
         }
       ]
     }
+  },
+  async mounted () {
+    const response = await axios.get('/private_numbers/bindings')
+    this.numberBindings = response.data.privateNumberBindings
   }
 })
 </script>

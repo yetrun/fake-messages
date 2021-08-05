@@ -8,5 +8,6 @@ router.get('/', function(req, res, next) {
 router.use('/emails', require('./emails'))
 router.use('/messages', require('./messages'))
 router.use('/templates', require('./templates'))
+router.use('/private_numbers/bindings', require('./private_number_bindings'))
 
 module.exports = router

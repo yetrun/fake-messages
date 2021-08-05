@@ -32,7 +32,9 @@ const destroy = async function (id) {
 }
 
 module.exports = {
+  all: findAll,
   findAll,
+  one: find,
   find,
   create,
   update,
