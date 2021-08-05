@@ -14,6 +14,10 @@
                 <Icon type="ios-chatboxes"></Icon>
                 短信
               </MenuItem>
+              <MenuItem name="private_numbers" :to="{ name: 'private_numbers' }" class="main-menu">
+                <Icon type="ios-call"></Icon>
+                隐私号码
+              </MenuItem>
               <MenuItem name="templates" :to="{ name: 'templates' }" class="main-menu">
                 <Icon type="ios-albums"></Icon>
                 模板
@@ -59,14 +63,7 @@ export default {
     }
   },
   created () {
-    const hash = window.location.hash
-    if (hash === '#/emails' || hash.startsWith('#/emails/')) {
-      this.activeMenu = 'emails'
-    } else if (hash === '#/messages' || hash.startsWith('#/messages/')){
-      this.activeMenu = 'messages'
-    } else if (hash === '#/templates' || hash.startsWith('#/templates/')){
-      this.activeMenu = 'templates'
-    }
+    this.activeMenu = this.$route.path.split('/')[1] || 'emails'
 
     websocket.connect()
   }

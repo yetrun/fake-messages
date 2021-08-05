@@ -46,7 +46,7 @@
       <template slot-scope="{ row }" slot="createdAt">
         {{ row.createdAt | datetime }}
       </template>
-      <template slot-scope="{ row }" slot="operators">
+      <template slot-scope="{ row }" slot="actions">
         <router-link :to="{ name: 'email', params: { id: row.id } }">查看</router-link>
       </template>
     </Table>
@@ -91,8 +91,8 @@ export default {
           slot: 'createdAt'
         },
         {
-          title: '操作',
-          slot: 'operators'
+          title: '动作',
+          slot: 'actions'
         }
       ],
       emails: [],
