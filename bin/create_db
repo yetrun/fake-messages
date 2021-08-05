@@ -1,44 +1,59 @@
 #!/usr/bin/env node
 
-const sqlite3 = require('sqlite3')
-// TODO: 使用 knex 改写
-const db = new sqlite3.Database('db/default.sqlite3')
+filename = process.argv[2] || 'db/default.sqlite3'
 
-db.run(`CREATE TABLE emails (
-  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  fromName VARCHAR(255),
-  fromAddress VARCHAR(255) NOT NULL,
-  toName VARCHAR(255),
-  toAddress VARCHAR(255) NOT NULL,
-  subject TEXT,
-  type VARCHAR(255) DEFAULT 'text', 
-  content TEXT NOT NULL, 
-  createdAt DATETIME DEFAULT (datetime('now','localtime'))
-)`)
+const knex = require('knex')({
+  client: 'sqlite3',
+  debug: true,
+  connection: {
+    filename: filename
+  }
+})
 
-db.run(`CREATE TABLE messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  toMobile VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
-  createdAt DATETIME DEFAULT (datetime('now','localtime'))
-)`)
+// TODO: 如果这里没有对 Promise 调用执行 then 方法，程序就会提前退出
+knex.schema.createTable('emails', function (table) {
+  table.increments()
+  table.string('fromName')
+  table.string('fromAddress').notNullable()
+  table.string('toName')
+  table.string('toAddress').notNullable()
+  table.text('subject')
+  table.string('type').defaultTo('text')
+  table.text('content').notNullable()
+  table.timestamp('createdAt').defaultTo(knex.fn.now())
+}).then(() => {
+  console.log('Table emails created!')
+})
 
-db.run(`CREATE TABLE tags (
-  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  name VARCHAR(255) NOT NULL,
-  targetType VARCHAR(255) NOT NULL,
-  targetId INTEGER NOT NULL
-)`)
+// TODO: messages 是否可以重新命名
+knex.schema.createTable('messages', function (table) {
+  table.increments()
+  table.string('toMobile').notNullable()
+  table.string('content').notNullable()
+  table.timestamp('createdAt').defaultTo(knex.fn.now())
+}).then(() => {
+  console.log('Table messages created!')
+})
 
-// TODO: 模板的 id
-db.run(`CREATE TABLE templates (
-  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  category VARCHAR(255) NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  subject VARCHAR(1023),
-  content TEXT NOT NULL,
-  contentType VARCHAR(255) DEFAULT 'text',
-  createdAt DATETIME DEFAULT (datetime('now','localtime'))
-)`)
+// TODO: 数据库的唯一性没有设置
+knex.schema.createTable('tags', function (table) {
+  table.increments()
+  table.string('name').notNullable()
+  table.string('targetType').notNullable()
+  table.integer('targetId').notNullable()
+}).then(() => {
+  console.log('Table tags created!')
+})
 
-db.close()
+knex.schema.createTable('templates', function (table) {
+  table.increments()
+  table.string('category').notNullable()
+  table.string('name').notNullable()
+  table.text('subject')
+  table.text('content').notNullable()
+  // 可否使用枚举类型
+  table.string('contentType').notNullable().defaultTo('text')
+  table.timestamp('createdAt').defaultTo(knex.fn.now())
+}).then(() => {
+  console.log('Table templates created!')
+})

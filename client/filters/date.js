@@ -4,5 +4,7 @@ import { zhCN } from 'date-fns/locale'
 
 // datetime可以是数字时间戳、时间字符串或 Date 对象
 Vue.filter('datetime', function (date) {
+  date = new Date(date)
+
   return format(date, 'PPPpp', { locale: zhCN })
 })

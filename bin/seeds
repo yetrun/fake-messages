@@ -20,7 +20,7 @@ async function createEmails () {
     createdAt: g.incrementedGenerator(
       new Date(2019, 0),
       date => addMonths(date, 1),
-      date => format(date, 'YYYY-MM-DD hh:mm:ss')
+      date => format(date, 'yyyy-MM-dd hh:mm:ss')
     )
   }, [
     // generate type and content
@@ -70,7 +70,7 @@ async function createMessages () {
     createdAt: g.incrementedGenerator(
       new Date(2019, 0),
       date => addMonths(date, 1),
-      date => format(date, 'YYYY-MM-DD hh:mm:ss')
+      date => format(date, 'yyyy-MM-dd hh:mm:ss')
     )
   })
   for (let i = 0; i < 15; i++) {
