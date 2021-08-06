@@ -9,6 +9,8 @@
         <a href="#">拨打</a>
       </template>
     </Table>
+    <br>
+    <Page :total="pagination.total" :page-size="pagination.perPage" :current="pagination.currentPage" @on-change="pageChanged" />
   </div>
 </template>
 
@@ -41,19 +43,35 @@ export default ({
           slot: 'actions'
         }
       ],
-      numberBindings: [
-        {
-          phoneNumberA: '199',
-          phoneNumberB: '188',
-          virtualNumber: '177',
-          createdAt: new Date()
-        }
-      ]
+      numberBindings: [],
+      pagination: {
+        currentPage: 1,
+        perPage: 10,
+        total: 0
+      }
     }
   },
-  async mounted () {
-    const response = await axios.get('/private_numbers/bindings')
-    this.numberBindings = response.data.privateNumberBindings
+  computed: {
+    paginationParams () {
+      return {
+        page: this.pagination.currentPage,
+        perPage: this.pagination.perPage
+      }
+    }
+  },
+  mounted () {
+    this.fetchBindings()
+  },
+  methods: {
+    pageChanged (newPage) {
+      this.pagination.currentPage = newPage
+      this.fetchBindings()
+    },
+    async fetchBindings () {
+      const response = await axios.get('/private_numbers/bindings', { params: this.paginationParams })
+      this.numberBindings = response.data.privateNumberBindings
+      this.pagination = response.data.pagination
+    }
   }
 })
 </script>
