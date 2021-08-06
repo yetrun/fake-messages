@@ -67,7 +67,7 @@ cd fake-messages
 yarn
 
 # 准备数据库
-bin/create_db
+bin/init-db
 
 # 打包客户端 js 文件
 yarn run build

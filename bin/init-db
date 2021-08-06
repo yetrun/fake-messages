@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+
+const knex = require('../server/dao/knex')
+
+async function createEmails () {
+  // TODO: 如果这里没有对 Promise 调用执行 then 方法，程序就会提前退出
+  await knex.schema.createTable('emails', function (table) {
+    table.increments()
+    table.string('fromName')
+    table.string('fromAddress').notNullable()
+    table.string('toName')
+    table.string('toAddress').notNullable()
+    table.text('subject')
+    table.string('type').defaultTo('text')
+    table.text('content').notNullable()
+    table.timestamp('createdAt').defaultTo(knex.fn.now())
+  }).then(() => {
+    console.log('Table emails created!')
+  })
+}
+
+async function createMessages () {
+  // TODO: messages 是否可以重新命名
+  await knex.schema.createTable('messages', function (table) {
+    table.increments()
+    table.string('toMobile').notNullable()
+    table.string('content').notNullable()
+    table.timestamp('createdAt').defaultTo(knex.fn.now())
+  }).then(() => {
+    console.log('Table messages created!')
+  })
+}
+
+async function createTags () {
+  // TODO: 数据库的唯一性没有设置
+  await knex.schema.createTable('tags', function (table) {
+    table.increments()
+    table.string('name').notNullable()
+    table.string('targetType').notNullable()
+    table.integer('targetId').notNullable()
+  }).then(() => {
+    console.log('Table tags created!')
+  })
+}
+
+async function createTemplates () {
+  await knex.schema.createTable('templates', function (table) {
+    table.increments()
+    table.string('category').notNullable()
+    table.string('name').notNullable()
+    table.text('subject')
+    table.text('content').notNullable()
+    // 可否使用枚举类型
+    table.string('contentType').notNullable().defaultTo('text')
+    table.timestamp('createdAt').defaultTo(knex.fn.now())
+  }).then(() => {
+    console.log('Table templates created!')
+  })
+}
+
+async function createPrivateNumberBindings () {
+  // TODO: 表名是否可以设置成大写
+  await knex.schema.createTable('privateNumberBindings', function (table) {
+    table.increments()
+    table.string('phoneNumberA').notNullable()
+    table.string('phoneNumberB').notNullable()
+    table.string('virtualNumber').notNullable()
+    table.timestamp('createdAt').defaultTo(knex.fn.now())
+  }).then(() => {
+    console.log('Table privateNumbers created!')
+  })
+}
+
+;(async function () {
+  try {
+    await createEmails()
+    await createMessages()
+    await createTags()
+    await createTemplates()
+    await createPrivateNumberBindings()
+  } finally {
+    await knex.destroy()
+  }
+})()
