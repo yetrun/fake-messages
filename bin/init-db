@@ -71,6 +71,23 @@ async function createPrivateNumberBindings () {
   })
 }
 
+async function createPrivateNumberCalls () {
+  await knex.schema.createTable('privateNumberCalls', function (table) {
+    table.increments()
+    table.string('fromPhoneNumber').notNullable()
+    table.string('toPhoneNumber').notNullable()
+    table.string('virtualNumber').notNullable()
+    table.datetime('callingAt').notNullable()
+    table.datetime('connectedAt').notNullable()
+    table.datetime('hungUpAt').notNullable()
+    table.integer('bindingId')
+
+    table.foreign('bindingId').references('privateNumberBindings.id')
+  }).then(() => {
+    console.log('Table privateCalls created!')
+  })
+}
+
 ;(async function () {
   try {
     await createEmails()
@@ -78,6 +95,7 @@ async function createPrivateNumberBindings () {
     await createTags()
     await createTemplates()
     await createPrivateNumberBindings()
+    await createPrivateNumberCalls()
   } finally {
     await knex.destroy()
   }

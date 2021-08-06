@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const express = require('express')
 const PrivateNumberBindingDAO = require('../dao/private_number_binding')
 

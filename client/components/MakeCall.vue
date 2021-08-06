@@ -1,5 +1,5 @@
 <template>
-  <Modal v-model="visible" width="360">
+  <Modal v-model="visible" width="360" @on-ok="makeCall">
     <p slot="header" style="text-align: center">
       <Icon type="ios-call"></Icon>
       <span>拨打电话</span>
@@ -19,10 +19,10 @@
               <Input v-model="call.virtualNumber" :readonly="true"></Input>
             </FormItem>
             <FormItem label="等待时间">
-              <InputNumber :max="10" :min="1" v-model="call.waitingDuration"></InputNumber>
+              <InputNumber :max="10000" :min="1" v-model="duration.connecting"></InputNumber>
             </FormItem>
             <FormItem label="通话时间">
-              <InputNumber :max="10" :min="1" v-model="call.duration"></InputNumber>
+              <InputNumber :max="10000" :min="1" v-model="duration.calling"></InputNumber>
             </FormItem>
           </Form>
         </Col>
@@ -41,12 +41,19 @@
 </template>
 
 <script>
+import { addSeconds } from 'date-fns'
+import axios from 'axios'
+
 export default {
   name: 'MakeCallModal',
   data () {
     return {
       visible: false,
-      call: {}
+      call: {},
+      duration: {
+        conneting: 0,
+        calling: 0
+      }
     }
   },
   methods: {
@@ -54,13 +61,25 @@ export default {
       this.visible = true
 
       this.call = {
+        bindingId: binding.id,
         fromPhoneNumber: binding.phoneNumberA,
         toPhoneNumber: binding.phoneNumberB,
         virtualNumber: binding.virtualNumber
       }
+      this.duration = {
+        connecting: 60,
+        calling: 600
+      }
     },
     swap () {
       [this.call.fromPhoneNumber, this.call.toPhoneNumber] = [this.call.toPhoneNumber, this.call.fromPhoneNumber]
+    },
+    makeCall () {
+      const callingAt = new Date()
+      const connectedAt = addSeconds(callingAt, this.duration.connecting)
+      const hungUpAt = addSeconds(connectedAt, this.duration.calling)
+
+      axios.post(`/private_numbers/calls`, { call: { ...this.call, ...{ callingAt, connectedAt, hungUpAt } } })
     }
   }
 }
