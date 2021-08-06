@@ -389,3 +389,59 @@ paths:
                     - "标签2"
                   content: "短信正文"
                   createdAt: "2019-07-22 18:06:06"
+  /private_numbers/bindings:
+    post:
+      summary: "添加号码绑定"
+      requestBody:
+        description: "号码绑定信息"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                privateNumberBinding:
+                  type: "object"
+                  properties:
+                    phoneNumberA:
+                      type: "string"
+                      description: "待绑定的号码之一"
+                      required: true
+                    phoneNumberB:
+                      type: "string"
+                      description: "待绑定的号码之二"
+                      required: true
+            example:
+              privateNumberBinding:
+                phoneNumberA: "aaa"
+                phoneNumberB: "bbb"
+      responses:
+        201:
+          description: "返回发送成功的邮件"
+          content:
+            application/json:
+              schema:
+                properties:
+                  privateNumberBinding:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "integer"
+                        description: "新绑定的 id"
+                        example: 1
+                      phoneNumberA:
+                        type: "string"
+                        description: "待绑定的号码之二"
+                        example: 'aaa'
+                      phoneNumberB:
+                        type: "string"
+                        description: "待绑定的号码之二"
+                        example: 'bbb'
+                      virtualNumber:
+                        type: "string"
+                        description: "已绑定的虚拟号"
+                        example: '0aaa0bbb0vvv'
+                      createdAt:
+                        type: "string"
+                        format: "date-time"
+                        description: "发送邮件的时间，格式始终是`YYYY-MM-DD hh:mm:ss`，时区以服务器所在时区为准"
+                        example: '2021-08-06 19:37:00'
