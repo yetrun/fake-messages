@@ -16,7 +16,8 @@ const all = async function ({
 }
 
 const one = async function (id) {
-  return await knex('privateNumberBindings').where('id', id)
+  const privateNumberBindings = await knex('privateNumberBindings').where('id', id)
+  return privateNumberBindings[0]
 }
 
 const create = async function (params) {

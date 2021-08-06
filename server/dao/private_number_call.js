@@ -1,18 +1,8 @@
 const knex = require('./knex')
 
-const all = async function ({
-  currentPage = 1,
-  perPage = 10
-} = {
-  currentPage: 1,
-  perPage: 10
-}) {
-  const { data: privateNumberBindings, pagination } = await knex('privateNumberBindings').select('*').orderBy('createdAt', 'desc').paginate({ currentPage, perPage, isLengthAware: true })
-  // TODO: 这里的分页返回用 pagination 对象
-  return {
-    privateNumberBindings,
-    pagination
-  }
+const all = async function ({ bindingId }) {
+  const privateNumberCalls = await knex('privateNumberCalls').select('*').where('privateNumberCalls.bindingId', bindingId)
+  return { privateNumberCalls }
 }
 
 const one = async function (id) {

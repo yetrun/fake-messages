@@ -6,7 +6,8 @@
         {{ row.createdAt | datetime }}
       </template>
       <template slot-scope="{ row }" slot="actions">
-        <a href="#" @click.prevent.stop="makeCall(row)">拨打</a>
+        <a href="#" @click.prevent.stop="makeCall(row)">拨打</a> |
+        <router-link :to="{ name: 'private_numbers.calls', params: { bindingId: row.id } }">通话记录</router-link>
       </template>
     </Table>
     <br>

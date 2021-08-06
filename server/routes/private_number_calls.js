@@ -1,16 +1,15 @@
 const { addSeconds } = require('date-fns')
 const express = require('express')
-const { body, validationResult } = require('express-validator')
+const { body, query, validationResult } = require('express-validator')
 const PrivateNumberCallDAO = require('../dao/private_number_call')
 
 const router = express.Router()
 
-router.get('/', async function(req, res, next) {
-  // const currentPage = parseInt(req.query.page || '1')
-  // const perPage = parseInt(req.query.perPage || '10')
-  
-  // const { privateNumberBindings, pagination } = await PrivateNumberBindingDAO.all({ currentPage, perPage })
-  // res.send({ privateNumberBindings, total: pagination.total, pagination })
+router.get('/', [
+  query('bindingId').notEmpty().toInt()
+], async function(req, res, _next) {
+  const { privateNumberCalls } = await PrivateNumberCallDAO.all({ bindingId: req.query.bindingId })
+  res.send({ privateNumberCalls })
 })
 
 router.post('/', [
