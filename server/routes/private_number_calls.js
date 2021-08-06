@@ -1,6 +1,7 @@
+const axios = require('axios')
 const { addSeconds } = require('date-fns')
 const express = require('express')
-const { body, query, validationResult } = require('express-validator')
+const { body, param, query, validationResult } = require('express-validator')
 const PrivateNumberCallDAO = require('../dao/private_number_call')
 
 const router = express.Router()
@@ -34,6 +35,26 @@ router.post('/', [
   //   event: 'NewEmail',
   //   data: email
   // })
+})
+
+router.post('/:id/push', [
+  param('id').toInt(),
+  body('pushUrl').notEmpty()
+], async function(req, res, _next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const call = await PrivateNumberCallDAO.one(req.params.id)
+
+  // 向 pushUrl 推送 call 数据
+  try {
+    await axios.post(req.body.pushUrl, { privateNumberCall: call })
+    res.status(200).send({ message: '推送成功' })
+  } catch (err) {
+    res.status(500).send({ message: '推送失败' })
+  }
 })
 
 module.exports = router

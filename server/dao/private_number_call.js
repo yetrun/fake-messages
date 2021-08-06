@@ -6,7 +6,8 @@ const all = async function ({ bindingId }) {
 }
 
 const one = async function (id) {
-  return await knex('privateNumberCalls').where('id', id)
+  const privateNumberCalls = await knex('privateNumberCalls').where('id', id)
+  return privateNumberCalls[0]
 }
 
 const create = async function (params) {

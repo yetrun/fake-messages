@@ -18,15 +18,24 @@
       <template slot-scope="{ row }" slot="hungUpAt">
         {{ row.hungUpAt | datetime }}
       </template>
+      <template slot-scope="{ row }" slot="actions">
+        <a href="#" @click.prevent.stop="push(row)">推送</a>
+      </template>
     </Table>
+
+    <PushModal ref="pushModal" />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import PushModal from '@/components/PushModal'
 
 export default {
   name: 'PrivateNumberCalls',
+  components: {
+    PushModal
+  },
   data () {
     return {
       columns: [
@@ -53,6 +62,10 @@ export default {
         {
           title: '挂断时间',
           slot: 'hungUpAt'
+        },
+        {
+          title: '动作',
+          slot: 'actions'
         }
       ],
       binding: {},
@@ -73,6 +86,10 @@ export default {
     async fetchCalls (bindingId) {
       const response = await axios.get(`/private_numbers/calls?bindingId=${bindingId}`)
       this.calls = response.data.privateNumberCalls
+    },
+    push (call) {
+      // TODO: 尝试用路由创建对话框
+      this.$refs.pushModal.show(call)
     }
   }
 }
