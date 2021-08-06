@@ -5,20 +5,26 @@
       <template slot-scope="{ row }" slot="createdAt">
         {{ row.createdAt | datetime }}
       </template>
-      <template slot="actions">
-        <a href="#">拨打</a>
+      <template slot-scope="{ row }" slot="actions">
+        <a href="#" @click.prevent.stop="makeCall(row)">拨打</a>
       </template>
     </Table>
     <br>
     <Page :total="pagination.total" :page-size="pagination.perPage" :current="pagination.currentPage" @on-change="pageChanged" />
+
+    <MakeCall ref="makeCall" />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import MakeCall from '@/components/MakeCall'
 
 export default ({
   name: 'PrivateNumberIndex',
+  components: {
+    MakeCall
+  },
   data () {
     return {
       columns: [
@@ -71,6 +77,9 @@ export default ({
       const response = await axios.get('/private_numbers/bindings', { params: this.paginationParams })
       this.numberBindings = response.data.privateNumberBindings
       this.pagination = response.data.pagination
+    },
+    makeCall (binding) {
+      this.$refs.makeCall.show(binding)
     }
   }
 })
