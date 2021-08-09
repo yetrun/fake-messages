@@ -36,7 +36,7 @@
           </RadioGroup>
         </FormItem>
         <FormItem>
-          <!--TODO: iview 的 select 组件之坑 -->
+          <!-- TODO: iView 的 select 组件之坑 -->
           <Select v-model="modal.template.tags" multiple clearable allow-create filterable placeholder="选择标签">
             <Option v-for="tag in modal.template.tags" :value="tag" :key="tag">{{ tag }}</Option>
             <Option value="调皮">调皮</Option>

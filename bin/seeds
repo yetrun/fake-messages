@@ -45,7 +45,6 @@ async function createEmails () {
     )
   ])
 
-  // TODO: 创建的时候走了好多条的 SQL
   for (let i = 1; i <= 15; i++) {
     const emailBase = generateEmailBase()
     console.log('Create email', emailBase)

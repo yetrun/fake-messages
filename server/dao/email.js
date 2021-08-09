@@ -1,7 +1,6 @@
 const knex = require('./knex')
 const TagsDAO = require('./tags')
 
-// TODO: 同时返回所有 tags
 const getAll = async function ({
   fromAddress,
   toAddress,
@@ -14,7 +13,10 @@ const getAll = async function ({
   from: 1,
   size: 10
 }) {
-  let query // 返回所有字段，在应用层过滤字段的值
+  // 这里不使用一条语句返回所有的 Email 和 Tags，而是使用 1+N 条语句。
+  // 原因在于使用查询时，难以保留所有 Email 和 Tag 的记录。（避免出现 where tags.name = 'TAG1' 只出现 'TAG1' 的情况）
+
+  let query
   if (tags) {
     query = knex('emails').select('emails.*')
       .leftJoin('tags', function () {

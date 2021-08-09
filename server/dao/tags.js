@@ -8,13 +8,13 @@ const saveOf = async function (tags, targetType, targetId) {
   }
 }
 
-const findOf = async function (...params) {
-  // TODO: 使用参数选择器
-  if (_.isNumber(params[1])) {
-    return await findOneOf(...params)
-  } else {
-    return await findAllOf(...params)
-  }
+// 该函数有两种调用方式：
+//
+// findOf(targetType, id) => 返回单个记录
+// findOf(targetType, options) => 返回多个记录
+const findOf = async function (targetType, options) {
+  const func = _.isNumber(options) ? findOneOf : findAllOf
+  return await func(targetType, options)
 }
 
 async function findOneOf (targetType, targetId) {

@@ -1,47 +1,47 @@
 const _ = require('lodash')
 const express = require('express')
-const { body, validationResult } = require('express-validator')
+const { body, validationResult, matchedData } = require('express-validator')
 const TemplateDAO = require('../dao/template')
 
 const router = express.Router()
-const allowed_params = ['name', 'category', 'subject' ,'content', 'content_type', 'tags']
+const validateBody = [
+  body('template.name').notEmpty(),
+  body('template.category'),
+  body('template.subject'),
+  body('template.content').notEmpty(),
+  body('template.contentType'),
+  body('template.tags').isArray()
+]
 
-router.get('/', async function(req, res, next) {
+router.get('/', async function(_req, res) {
   const { templates } = await TemplateDAO.findAll()
   res.send({ templates })
 })
 
-router.post('/', [
-  body('template.name').not().isEmpty(),
-  body('template.content').not().isEmpty()
-], async function(req, res, next) {
+router.post('/', validateBody, async function(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  // TODO: 使用 validation 提取参数
-  const templateParams = _.pick(req.body.template, ['name', 'category', 'subject' ,'content', 'content_type', 'tags'])
+  const templateParams = matchedData(req).template
   const template = await TemplateDAO.create(templateParams)
-  res.send({ template })
+  res.status(201).send({ template })
 })
 
-router.put('/:id', [
-  body('template.name').not().isEmpty(),
-  body('template.content').not().isEmpty()
-], async function(req, res, next) {
+router.put('/:id', validateBody, async function(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const templateParams = _.pick(req.body.template, ['name', 'category', 'subject' ,'content', 'content_type', 'tags'])
-  templateParams.id = req.params.id
-  const template = await TemplateDAO.update(templateParams)
+  const templateId = req.params.id
+  const templateParams = matchedData(req).template
+  const template = await TemplateDAO.update({ id: templateId, ...templateParams })
   res.send({ template })
 })
 
-router.delete('/:id', async function (req, res, next) {
+router.delete('/:id', async function (req, res) {
   const templateId = req.params.id
   await TemplateDAO.destroy(templateId)
   res.end()
