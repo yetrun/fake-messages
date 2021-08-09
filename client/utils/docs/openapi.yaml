@@ -445,3 +445,55 @@ paths:
                         format: "date-time"
                         description: "发送邮件的时间，格式始终是`YYYY-MM-DD hh:mm:ss`，时区以服务器所在时区为准"
                         example: '2021-08-06 19:37:00'
+  /private_numbers/call_records:
+    post:
+      summary: '展示推送通话记录的格式'
+      description: |
+        这个接口文档展示推送通话记录的格式。请忽略路径 "/private_numbers/call_records"，它应替代为用户自定义的路径。推送通话记录时，向用户指定的地址发送一个 `POST` 请求。
+      requestBody:
+        description: "通话记录的格式"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                privateNumberCall:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      description: "通话记录的 id"
+                    bindingId:
+                      type: "number"
+                      description: "虚拟号码绑定的 id"
+                    fromPhoneNumber:
+                      type: "string"
+                      description: "呼叫号码"
+                    toPhoneNumber:
+                      type: "string"
+                      description: "接听号码"
+                    virtualNumber:
+                      type: "string"
+                      description: "虚拟号码"
+                    callingAt:
+                      type: "string"
+                      format: "date-time"
+                      description: "拨打电话的时间，格式始终是`YYYY-MM-DD hh:mm:ss`，时区以服务器所在时区为准，下同。"
+                    connectedAt:
+                      type: "string"
+                      format: "date-time"
+                      description: "接通电话的时间"
+                    hungUpAt:
+                      type: "string"
+                      format: "date-time"
+                      description: "挂断电话的时间"
+            example:
+              privateNumberCall:
+                id: 1
+                bindingId: 10
+                fromPhoneNumber: "aaa"
+                toPhoneNumber: "bbb"
+                virtualNumber: "0aaa0bbb0vvv"
+                callingAt: "2021-08-09 18:49:00"
+                connectedAt: "2021-08-09 18:49:30"
+                hungUpAt: "2021-08-09 18:59:00"
