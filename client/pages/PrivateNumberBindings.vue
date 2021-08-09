@@ -80,6 +80,7 @@ export default ({
       this.pagination = response.data.pagination
     },
     makeCall (binding) {
+      // 使用路由创建对话框：iView 组件不支持，应为当执行 $router.back() 时，iView 的 Modal 组件无法清理干净
       this.$refs.makeCall.show(binding)
     }
   }

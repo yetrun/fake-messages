@@ -83,7 +83,6 @@ async function createMessages () {
 
 async function createPrivateNumberBindings () {
   const generatePrivateNumberBinding = g.objectGenerator({
-    // TODO: 常量 generator
     phoneNumberA: g.sequenceGenerator(i => 'a' + i),
     phoneNumberB: g.sequenceGenerator(i => 'b' + i),
     virtualNumber: g.sequenceGenerator(i => 'v' + i),

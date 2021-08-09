@@ -88,7 +88,6 @@ export default {
       this.calls = response.data.privateNumberCalls
     },
     push (call) {
-      // TODO: 尝试用路由创建对话框
       this.$refs.pushModal.show(call)
     }
   }
