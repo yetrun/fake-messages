@@ -15,14 +15,14 @@ const getAll = async function ({
 }) {
   let query // 返回所有字段，在应用层过滤字段的值
   if (tags) {
-    query = knex('messages').select('messages.*')
+    query = knex('ShortMessages').select('messages.*')
       .leftJoin('tags', function () {
         this.on('tags.targetId', '=', 'messages.id')
       })
       .whereIn('tags.name', tags).where('tags.targetType', 'Message')
       .groupBy('messages.id')
   } else {
-    query = knex('messages').select('*')
+    query = knex('ShortMessages').select('*')
   }
 
   if (toMobile) query = query.where('messages.toMobile', toMobile)
@@ -33,29 +33,29 @@ const getAll = async function ({
     .paginate({ perPage: size, currentPage: Math.floor((from - 1) / 10) + 1, isLengthAware: true })
   await Promise.all(
     messages.map(message => { 
-      return TagsDAO.findOf('Message', message.id).then(tags => message.tags = tags)
+      return TagsDAO.findOf('ShortMessage', message.id).then(tags => message.tags = tags)
     })
   )
   return { messages, total: pagination.total, pagination }
 }
 
 const getOne = async function (id) {
-  const messages = await knex('messages').where('id', id)
+  const messages = await knex('ShortMessages').where('id', id)
   const message = messages[0]
-  message.tags = await TagsDAO.findOf('Message', id)
+  message.tags = await TagsDAO.findOf('ShortMessage', id)
   return message
 }
 
 const create = async function ({ tags = [], ...params }) {
-  const [messageId] = await knex('messages').insert(params)
+  const [messageId] = await knex('ShortMessages').insert(params)
   for (const tag of tags) {
-    await knex('tags').insert({ name: tag, targetType: 'Message', targetId: messageId })
+    await knex('tags').insert({ name: tag, targetType: 'ShortMessage', targetId: messageId })
   }
   return getOne(messageId)
 }
 
 const getToMobiles = async function ({ filter }) {
-  const messages = await knex('messages').select('toMobile')
+  const messages = await knex('ShortMessages').select('toMobile')
     .where('toMobile', 'like', `%${filter}%`)
     .groupBy('toMobile')
     .orderBy('createdAt', 'desc')
