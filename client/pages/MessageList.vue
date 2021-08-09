@@ -106,7 +106,7 @@ export default {
       this.fetchMessages()
     },
     fetchMessages () {
-      axios.get('/messages', { params: { ...this.filters, ...this.pageParams } })
+      axios.get('/short_messages', { params: { ...this.filters, ...this.pageParams } })
         .then(response => {
           const data = response.data
           this.messages = data.messages
@@ -117,7 +117,7 @@ export default {
         })
     },
     fetchToMobiles (filter = '') {
-      axios.get('/messages/toMobiles', { params: { filter } })
+      axios.get('/short_messages/toMobiles', { params: { filter } })
         .then(({ data: { toMobiles }}) => {
           this.options.toMobiles = toMobiles
         })
@@ -126,7 +126,7 @@ export default {
         })
     },
     fetchTags () {
-      axios.get('/messages/tags')
+      axios.get('/short_messages/tags')
         .then(({ data: { tags }}) => {
           this.options.tags = tags
         })
