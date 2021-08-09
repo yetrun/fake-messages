@@ -38,8 +38,7 @@
         <FormItem>
           <!-- TODO: iView 的 select 组件之坑 -->
           <Select v-model="modal.template.tags" multiple clearable allow-create filterable placeholder="选择标签">
-            <Option v-for="tag in modal.template.tags" :value="tag" :key="tag">{{ tag }}</Option>
-            <Option value="调皮">调皮</Option>
+            <Option v-for="tag in tags" :value="tag" :key="tag">{{ tag }}</Option>
           </Select>
         </FormItem>
         <FormItem v-if="modal.template.category === 'Email'">
@@ -115,10 +114,19 @@ export default {
           tags: []
         },
         shown: false
-      }
+      },
+      tags: []
     }
   },
+  mounted () {
+    this.fetchTemplates()
+    this.fetchTags()
+  },
   methods: {
+    async fetchTags () {
+      const response = await axios.get('/templates/tags')
+      this.tags = response.data.tags
+    },
     fetchTemplates () {
       axios.get('/templates')
         .then(response => {
@@ -152,7 +160,7 @@ export default {
     },
     deleteTemplate (template) {
       axios.delete(`/templates/${template.id}`)
-        .then(response => {
+        .then(() => {
           const i = this.templates.findIndex(temp => temp.id === template.id)
           this.templates.splice(i, 1)
         })
@@ -181,9 +189,6 @@ export default {
         this.modal.title = '新增模板'
       }
     }
-  },
-  mounted () {
-    this.fetchTemplates()
   }
 }
 </script>
