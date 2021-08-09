@@ -3,15 +3,14 @@
 const knex = require('../server/dao/knex')
 
 async function createEmails () {
-  // TODO: 如果这里没有对 Promise 调用执行 then 方法，程序就会提前退出
-  await knex.schema.createTable('emails', function (table) {
+  await knex.schema.createTable('Emails', function (table) {
     table.increments()
     table.string('fromName')
     table.string('fromAddress').notNullable()
     table.string('toName')
     table.string('toAddress').notNullable()
-    table.text('subject')
-    table.string('type').defaultTo('text')
+    table.string('subject')
+    table.enum('type', ['text', 'html']).defaultTo('text')
     table.text('content').notNullable()
     table.timestamp('createdAt').defaultTo(knex.fn.now())
   }).then(() => {
@@ -21,7 +20,7 @@ async function createEmails () {
 
 async function createMessages () {
   // TODO: messages 是否可以重新命名
-  await knex.schema.createTable('messages', function (table) {
+  await knex.schema.createTable('Messages', function (table) {
     table.increments()
     table.string('toMobile').notNullable()
     table.string('content').notNullable()
@@ -32,26 +31,26 @@ async function createMessages () {
 }
 
 async function createTags () {
-  // TODO: 数据库的唯一性没有设置
-  await knex.schema.createTable('tags', function (table) {
+  await knex.schema.createTable('Tags', function (table) {
     table.increments()
     table.string('name').notNullable()
-    table.string('targetType').notNullable()
+    table.enum('targetType', ['Email', 'Message', 'Template']).notNullable()
     table.integer('targetId').notNullable()
+
+    table.unique(['name', 'targetType', 'targetId'])
   }).then(() => {
     console.log('Table tags created!')
   })
 }
 
 async function createTemplates () {
-  await knex.schema.createTable('templates', function (table) {
+  await knex.schema.createTable('Templates', function (table) {
     table.increments()
     table.string('category').notNullable()
     table.string('name').notNullable()
     table.text('subject')
     table.text('content').notNullable()
-    // 可否使用枚举类型
-    table.string('contentType').notNullable().defaultTo('text')
+    table.enum('contentType', ['text', 'html']).notNullable().defaultTo('text')
     table.timestamp('createdAt').defaultTo(knex.fn.now())
   }).then(() => {
     console.log('Table templates created!')
@@ -59,8 +58,7 @@ async function createTemplates () {
 }
 
 async function createPrivateNumberBindings () {
-  // TODO: 表名是否可以设置成大写
-  await knex.schema.createTable('privateNumberBindings', function (table) {
+  await knex.schema.createTable('PrivateNumberBindings', function (table) {
     table.increments()
     table.string('phoneNumberA').notNullable()
     table.string('phoneNumberB').notNullable()
@@ -72,7 +70,7 @@ async function createPrivateNumberBindings () {
 }
 
 async function createPrivateNumberCalls () {
-  await knex.schema.createTable('privateNumberCalls', function (table) {
+  await knex.schema.createTable('PrivateNumberCalls', function (table) {
     table.increments()
     table.string('fromPhoneNumber').notNullable()
     table.string('toPhoneNumber').notNullable()
