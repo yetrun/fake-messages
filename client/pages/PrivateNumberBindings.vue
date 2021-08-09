@@ -22,7 +22,7 @@ import axios from 'axios'
 import MakeCall from '@/components/MakeCall'
 
 export default ({
-  name: 'PrivateNumberIndex',
+  name: 'PrivateNumberBindings',
   components: {
     MakeCall
   },
