@@ -2,6 +2,8 @@
 
 > 一个虚拟的邮件和短信服务提供商
 
+> ChangeLog: 增加了隐私号码的支持，有时间我将调整一下 README.
+
 邮件和短信服务是我们在项目开发中经常会遇到的功能。常规的框架一般会搭载邮件发送的能力，例如 Rails 的 Action Mailer，Java 的 Java Mail API 等。它们一般都可以通过配置 POP3 协议得以实现。除此之外，市面上还诞生了更多的邮件和短信服务提供商，例如 Mailgun、Submail等。服务商提供了一套发送邮件和短信的接口，我们又可以通过调用接口的方式实现邮件和短信的发送。
 
 例如 Submail，可以如下调用接口发送一封邮件：
@@ -56,6 +58,8 @@ curl -X POST 'http://{{host}}/emails' -H  'accept: application/json' -H  'Conten
 
 ### 部署
 
+#### 手动部署
+
 ```shell
 # 克隆代码到本地
 git clone https://gitee.com/run27017/fake-messages.git
@@ -77,6 +81,16 @@ PORT=3000 yarn start
 ```
 
 可以配置 https，传递环境变量 `SSL_KEY_PATH`、`SSL_CERT_PATH`（只许用 pem 格式）。
+
+#### 使用 Docker
+
+```bash
+# 构建镜像
+docker image build -t fake-messages .
+
+# 启动容器（将本机的 80 端口映射到容器的 3000 端口，可根据实际需要调整）
+docker container run --rm --name fake-messages -p 80:3000 fake-messages
+```
 
 ### 使用
 

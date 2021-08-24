@@ -1,0 +1,5 @@
+node_modules
+
+# 数据库
+/db/*
+!/db/.keep
