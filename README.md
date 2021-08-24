@@ -1,59 +1,35 @@
 # Fake Messages
 
-> 一个虚拟的邮件和短信服务提供商
+> 一个虚拟的邮件、短信和隐私号码的服务提供商
 
-> ChangeLog: 增加了隐私号码的支持，有时间我将调整一下 README.
+**Fake Messages 是为了开发者而生。** 当我们在平时开发项目时，会遇到发送邮件或短信的行为。拿发送短信为例，如果我们做到真实的发送效果，会遇到以下麻烦：
 
-邮件和短信服务是我们在项目开发中经常会遇到的功能。常规的框架一般会搭载邮件发送的能力，例如 Rails 的 Action Mailer，Java 的 Java Mail API 等。它们一般都可以通过配置 POP3 协议得以实现。除此之外，市面上还诞生了更多的邮件和短信服务提供商，例如 Mailgun、Submail等。服务商提供了一套发送邮件和短信的接口，我们又可以通过调用接口的方式实现邮件和短信的发送。
+1. 某条数据存了真实的用户手机号码，从而向真实的用户发送了测试短信。
+2. 向开发组内成员发送短信，却发现组内成员的手机号不够用。
 
-例如 Submail，可以如下调用接口发送一封邮件：
+Fake Messages 规避了此类风险，并突破了这种限制。
 
-```shell
-curl -XPOST 'https://api.mysubmail.com/mail/send.json' -d '
-appid=your_app_id
-&to=leo <leo@submail.cn>
-&subject=testing_Subject
-&text=testing_text_body
-&from=no-reply@submail.cn
-&signature=your_app_key'
-```
+## 产品界面
 
-服务商相比于我们自己配置 POP3 协议有一些便利的地方：第一点在于它很简单；第二点在于它为我们处理发送大量邮件的。
+（这是早期版本的产品界面，当前版本添加了虚拟号码的支持）
 
-我们在生产环境下使用服务商产生生产数据。然而，**在开发环境下，是不适合发送到真实的邮箱和手机号的**。
+### 邮件列表
 
-为此，我特地开发了一套 Fake Messages 系统，你可以理解为一个虚拟的邮箱和短信服务的提供商。在这个提供商里，它也是通过接口的方式发送的。例如，向下面这样发送邮件：
+<img src="assets/email-list.png" alt="邮件列表界面" width="680">
 
-```shell
-curl -X POST 'http://{{host}}/emails' -H  'accept: application/json' -H  'Content-Type: application/json' -d '
-{
-  "email": {
-    "toAddress": "receiver@example.com",
-    "toName": "接收者",
-    "fromAddress": "sender@example.com",
-    "fromName": "发送者",
-    "tags": [
-      "标签1",
-      "标签2"
-    ],
-    "subject": "邮件主题",
-    "type": "text",
-    "content": "邮件正文"
-  }
-}'
-```
+### 短信列表
 
-与常规的服务商不同的是，**它所有的邮件和短信都不会发送给真实的用户，而是汇集到该系统本身**。可以通过打开它的界面查看所有接收到的邮件和短信，它们是长这样的：
+<img src="assets/email-list.png" alt="短信列表界面" width="680">
 
-![邮件列表界面](assets/email-list.png)
+### 开发者文档
 
-![短信列表界面](assets/message-list.png)
+<img src="assets/developer-help.png" alt="开发者文档" width="680">
 
 ## 快速上手
 
 ### 准备
 
-1. 需要 node，我用的是 node 10.
+1. 需要 `node`.
 2. 需要 [yarn](https://yarnpkg.com/lang/zh-hans/docs/install).
 
 ### 部署
