@@ -246,7 +246,7 @@ paths:
                   type: "text"
                   content: "邮件正文"
                   createdAt: "2019-07-22 18:06:06"
-  /messages/send:
+  /short_messages/send:
     post:
       summary: "发送短信"
       requestBody:
@@ -315,7 +315,7 @@ paths:
                     - "标签2"
                   content: "短信正文"
                   createdAt: "2019-07-22 18:06:06"
-  /messages/xsend:
+  /short_messages/xsend:
     post:
       summary: "通过模板发送短信"
       requestBody:
